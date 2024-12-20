@@ -96,35 +96,43 @@ char * ecritureMots(int nTrain, int ipXway, int codeTroncon, int codeAig){
 }   
 
 int changementAiguillage(int sd, int nTrain, int codeAig){
-    int idRequete = 1;
-    char *requete = creationRequete("37", idRequete, ecritureMots(nTrain, IPXWAY_SRC, -1, codeAig), IPXWAY_SRC, IPXWAY_DEST, 1);
+    int idRequete = nTrain*10 + rand() % 10;
+    char *requete, buff[100], *recu; 
+    int nbcar, tailleRequete; 
 
-#ifdef DEBUG
+    requete = creationRequete("37", idRequete, ecritureMots(nTrain, IPXWAY_SRC, -1, codeAig), IPXWAY_SRC, IPXWAY_DEST, 1); 
     DEBUG_PRINT("requete : %s\n", requete);
-#endif
 
-    return 0;
+    tailleRequete = strlen(requete); 
+
+    char *trameBinaire = conversionAscii2Binaire(requete, tailleRequete);
+    CHECK(send(sd, trameBinaire, tailleRequete/2, 0), "Envoi fail !!!\n");
+    DEBUG_PRINT("Envoi reussi\n");
+
+    nbcar = recvfrom(sd,buff, 100, 0, NULL, NULL);
+    recu = conversionBinaire2Ascii(buff, nbcar);
+    DEBUG_PRINT("Reponse: %s\n", recu);
+
+    char ack = recu[strlen(recu) - 1];
+    printf("Ack: %c\n", ack);
+
+    free(requete);
+    free(trameBinaire);
+
+    if (ack == 'E') return 1;
+    else if (ack == 'D') return 0;
+    else return -1;
+
 }
     
 
 
 int main(int argc, char const *argv[])
-{
-    //char *requete = creationRequete("24", 1, "", 41, 14, 1); // start 24 et stop 25 avec ecriture ""
-    char *requete = creationRequete("37", 1, ecritureMots(1, IPXWAY_SRC, 22, -1), IPXWAY_SRC, 14, 1); // 37 pour envoyer des mots  poids faible en premier puis poids fort genre 2001 -> 0x7d1 donc eciture 1d07
-    char *trameBinaire = conversionAscii2Binaire(requete, strlen(requete));
-
-    printf("requete : %s\n", requete);
-    //afficherBinaire(trameBinaire, strlen(requete)/2);
-
-
+{   
     
     int sd1; //descripteur de socket de dialogue
     struct sockaddr_in addrServ;
-    int adrlg = sizeof(struct sockaddr_in);
-    int nbcar;
-    char buff[100];
-
+    
     //Etape 1 - Creation de la socket
 
     sd1 = socket(AF_INET, SOCK_STREAM, 0);
@@ -140,19 +148,16 @@ int main(int argc, char const *argv[])
 
     //Etape 3 - demande d'ouverture de connexion
 
-    // CHECKERROR(connect(sd1, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)),-1, "Connexion fail !!!\n");
-    // printf("Connexion reussie\n");
+    CHECK(connect(sd1, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)), "Connexion fail !!!\n");
+    printf("Connexion reussie\n");
 
-    // CHECKERROR(send(sd1, trameBinaire, strlen(requete)/2, 0), -1, "Envoi fail !!!\n");
-    // printf("Envoi reussi\n");
+    CHECK(changementAiguillage(sd1, 1, 22), "Changement aiguillage fail !!!\n");
+    printf("Changement aiguillage reussi\n");
 
-    // nbcar = recvfrom(sd1,buff, 100, 0, NULL, NULL);
-    // // afficherBinaire(buff, nbcar);
-    // printf("Reponse: '%s' \n", conversionBinaire2Ascii(buff, nbcar));
+    // Faire allumage troncon
+    // faire demande de localisation du train avec gestion de la reponse en lisant la chaine recu.
+    
     
     close(sd1);
-    free(requete);
-    free(trameBinaire);
-
     return 0;
 }

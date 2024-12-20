@@ -7,7 +7,7 @@ LIBS=
 
 SRC = $(wildcard ./src/*.c)
 
-all: bin/clientTrain bin/clientTrainDEBUG 
+all: bin/messagerieTrainApi bin/messagerieTrainApiDEBUG 
 
 
 bin/main: $(SRC) 
@@ -16,10 +16,10 @@ bin/main: $(SRC)
 bin/mainDEBUG: $(SRC)
 	@gcc $(CSTFLAGS) $(CFLAGS) $^ -o $@ $(LIBS)
 
-bin/clientTrain: src/clientTrain.c
+bin/messagerieTrainApi: src/messagerieTrainApi.c
 	@gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
-bin/clientTrainDEBUG: src/clientTrain.c
+bin/messagerieTrainApiDEBUG: src/messagerieTrainApi.c
 	@gcc $(CSTFLAGS) $(CFLAGS) $^ -o $@ $(LIBS)
 
 clean:
