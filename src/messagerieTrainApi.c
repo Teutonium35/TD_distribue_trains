@@ -142,12 +142,12 @@ int main(int argc, char const *argv[])
     //Etape2 - Adressage du destinataire
 
     addrServ.sin_family=AF_INET;
-    addrServ.sin_port=htons(PORT_DEST);
+    addrServ.sin_port=htons(PORT_DEST); 
     addrServ.sin_addr.s_addr=inet_addr(IP_DEST);
 
 
     //Etape 3 - demande d'ouverture de connexion
-
+    printf("IP_DEST : %s, PORT_DEST: %d\n", IP_DEST, PORT_DEST);
     CHECK(connect(sd1, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)), "Connexion fail !!!\n");
     printf("Connexion reussie\n");
 

@@ -23,10 +23,15 @@
 /*              C O N S T A N T E S     S Y M B O L I Q U E S               */
 /* ------------------------------------------------------------------------ */
 
-#define IP_DEST         "10.31.125.14"
-#define PORT_DEST       502
-#define IPXWAY_DEST     14
-
+#ifdef TEST
+    #define IP_DEST         "127.0.0.1"
+    #define PORT_DEST       3000
+    #define IPXWAY_DEST     14
+#else
+    #define IP_DEST         "10.31.125.14"
+    #define PORT_DEST       502
+    #define IPXWAY_DEST     14
+#endif
 
 /* ------------------------------------------------------------------------ */
 /*              D É F I N I T I O N S   D E   T Y P E S                     */
