@@ -33,6 +33,10 @@
     #define IPXWAY_DEST     14
 #endif
 
+#define TYPE_TRONCON        0
+#define TYPE_AIGUILLAGE     1
+#define TYPE_INVERSION      2
+
 /* ------------------------------------------------------------------------ */
 /*              D É F I N I T I O N S   D E   T Y P E S                     */
 /* ------------------------------------------------------------------------ */

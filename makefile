@@ -25,8 +25,14 @@ bin/messagerieTrainApiDEBUG: src/messagerieTrainApi.c
 bin/messagerieTrainApiTEST: src/messagerieTrainApi.c
 	@gcc $(CSTFLAGS) -DTEST $(CFLAGS) $^ -o $@ $(LIBS)
 
+testMsg: bin/messagerieTrainApiTEST
+		@./bin/messagerieTrainApiTEST
+
 bin/receptionTestApiXway: src/receptionTestApiXway.c
 	@gcc $(CSTFLAGS) -DTEST $(CFLAGS) $^ -o $@ $(LIBS)
+
+testRecp: bin/receptionTestApiXway
+	@./bin/receptionTestApiXway
 
 clean:
 	@rm -f ./bin/*

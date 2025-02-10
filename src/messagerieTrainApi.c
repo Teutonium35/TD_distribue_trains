@@ -6,17 +6,24 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define IPXWAY_SRC      41
 
 #include <utils.h>
 
+int getIPXwaySrc();
 
-char *creationRequete(char * requete, int idRequete, char * ecriture, int  ipSrc, int ipDest, int cree){
+char *creationRequete(int  ipSrc, int ipDest, int cree, int idRequete, char * requete, char * ecriture){
     char *requeteStr = (char *) malloc(100);
-    char *requeteStrIntermediaire = (char *)malloc(100);
+    char *adressageRequete = (char *) malloc(14);
+    char *requeteStrIntermediaire = (char *) malloc(100);
     int longueur = 0;
 
-    sprintf(requeteStrIntermediaire, "f1%02x10%02x10%s%02x%s06%s", ipSrc, ipDest, (cree ==1) ? "09": "1e", idRequete, requete, ecriture);
+    sprintf(adressageRequete, "f1%02x10%02x10%s%02x", ipSrc, ipDest, (cree ==1) ? "09": "1e", idRequete);
+
+    if (cree == 1){
+        sprintf(requeteStrIntermediaire, "%s%s06%s", adressageRequete, requete, ecriture);
+    } else {
+        sprintf(requeteStrIntermediaire, "%s", adressageRequete);
+    }
 
     longueur = strlen(requeteStrIntermediaire)/2;
 
@@ -99,32 +106,235 @@ int changementAiguillage(int sd, int nTrain, int codeAig){
     int idRequete = nTrain*10 + rand() % 10;
     char *requete, buff[100], *recu; 
     int nbcar, tailleRequete; 
+    
+    int ipXwaySrc = getIPXwaySrc();
 
-    requete = creationRequete("37", idRequete, ecritureMots(nTrain, IPXWAY_SRC, -1, codeAig), IPXWAY_SRC, IPXWAY_DEST, 1); 
-    DEBUG_PRINT("requete : %s\n", requete);
+    requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 1, idRequete, "37", ecritureMots(nTrain, ipXwaySrc, -1, codeAig)); 
+    DEBUG_PRINT("changementAiguillage : requete=%s\n", requete);
 
     tailleRequete = strlen(requete); 
 
     char *trameBinaire = conversionAscii2Binaire(requete, tailleRequete);
-    CHECK(send(sd, trameBinaire, tailleRequete/2, 0), "Envoi fail !!!\n");
-    DEBUG_PRINT("Envoi reussi\n");
+    CHECK(send(sd, trameBinaire, tailleRequete/2, 0), "changementAiguillage : Envoi rate\n");
+    DEBUG_PRINT("changementAiguillage : Envoi reussi\n");
 
     nbcar = recvfrom(sd,buff, 100, 0, NULL, NULL);
     recu = conversionBinaire2Ascii(buff, nbcar);
-    DEBUG_PRINT("Reponse: %s\n", recu);
+    DEBUG_PRINT("changementAiguillage : Reponse=%s\n", recu);
 
     char ack = recu[strlen(recu) - 1];
-    printf("Ack: %c\n", ack);
+    
 
     free(requete);
     free(trameBinaire);
+    free(recu);
+
+    DEBUG_PRINT("changementAiguillage : Ack=%c\n", ack);
 
     if (ack == 'E') return 1;
     else if (ack == 'D') return 0;
     else return -1;
 
 }
+
+int allumageTroncon(int sd, int nTrain, int codeTroncon){
+    int idRequete = nTrain*10 + rand() % 10;
+    char *requete, buff[100], *recu; 
+    int nbcar, tailleRequete; 
+
+    int ipXwaySrc = getIPXwaySrc();
+
+    requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 1, idRequete, "37", ecritureMots(nTrain, ipXwaySrc, codeTroncon, -1)); 
+    DEBUG_PRINT("allumageTroncon : Requete=%s\n", requete);
+
+    tailleRequete = strlen(requete); 
+
+    char *trameBinaire = conversionAscii2Binaire(requete, tailleRequete);
+    CHECK(send(sd, trameBinaire, tailleRequete/2, 0), "allumageTroncon : Envoi rate\n");
+    DEBUG_PRINT("allumageTroncon : Envoi reussi\n");
+
+    nbcar = recvfrom(sd,buff, 100, 0, NULL, NULL);
+    recu = conversionBinaire2Ascii(buff, nbcar);
+    DEBUG_PRINT("allumageTroncon : Reponse=%s\n", recu);
+
+    char ack = recu[strlen(recu) - 1];
+
+    free(requete);
+    free(trameBinaire);
+    free(recu);
+
+    DEBUG_PRINT("allumageTroncon : Ack=%c\n", ack);
+
+    if (ack == 'E') return 1;
+    else if (ack == 'D') return 0;
+    else return -1;
+
+}
+
+int reponseXway(int sd, int *nTrain, int *nType, int *nCapteur){
+    char buff[100], *recu; 
+    int nbcar; 
+
+    DEBUG_PRINT("reponseXway : Attente reponse Xway\n");
+
+    nbcar = recvfrom(sd, buff, 100, 0, NULL, NULL);
+    recu = conversionBinaire2Ascii(buff, nbcar);
+    DEBUG_PRINT("reponseXway : Reponse=%s\n", recu);
+
     
+    int idRequete = (recu[26] <= '9' ? recu[26] - '0' : recu[26] - 'A' + 10) * 16 + (recu[27] <= '9' ? recu[27] - '0' : recu[27] - 'A' + 10);
+    DEBUG_PRINT("reponseXway : idRequete=%d\n", idRequete);
+    
+    int tailleRequete;
+    char *requete; 
+    int ipXwaySrc = getIPXwaySrc();
+
+    requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 0, idRequete, NULL,   NULL); 
+    DEBUG_PRINT("reponseXway : Requete=%s\n", requete);
+
+    tailleRequete = strlen(requete); 
+
+    char *trameBinaire = conversionAscii2Binaire(requete, tailleRequete);
+    CHECK(send(sd, trameBinaire, tailleRequete/2, 0), "reponseXway : Envoi rate\n");
+    DEBUG_PRINT("reponseXway : Envoi reussi\n");
+
+
+    int nCapt = 0;
+    nCapt += (recu[44] <= '9' ? recu[44] - '0' : recu[44] - 'A' + 10) * 16;
+    nCapt += (recu[45] <= '9' ? recu[45] - '0' : recu[45] - 'A' + 10);
+
+    nCapt += (recu[46] <= '9' ? recu[46] - '0' : recu[46] - 'A' + 10) * 16*16*16;
+    nCapteur += (recu[47] <= '9' ? recu[47] - '0' : recu[47] - 'A' + 10) * 16*16;
+
+    DEBUG_PRINT("reponseXway : nCapt=%d\n", nCapt);
+
+    *nCapteur = nCapt;
+
+
+    int nMot = 0;
+    nMot += (recu[36] <= '9' ? recu[36] - '0' : recu[36] - 'A' + 10) * 16;
+    nMot += (recu[37] <= '9' ? recu[37] - '0' : recu[37] - 'A' + 10);
+
+    nMot += (recu[38] <= '9' ? recu[38] - '0' : recu[38] - 'A' + 10) * 16*16*16;
+    nMot += (recu[39] <= '9' ? recu[39] - '0' : recu[39] - 'A' + 10) * 16*16;
+
+    DEBUG_PRINT("reponseXway : nMot=%d\n", nMot);
+
+    /*
+    nType = 0 : Valeur du capteur d'arrivée sur le tronçon suivant
+    nType = 1 : Code requête envoyé pour demander le service
+    
+    */
+
+    switch (nMot)
+    {
+    case 8:
+        *nTrain = 1;
+        *nType = TYPE_TRONCON;
+        break;
+    case 9:
+        *nTrain = 1;
+        *nType = TYPE_AIGUILLAGE;
+        break;
+    case 10:
+        *nTrain = 3;
+        *nType = TYPE_TRONCON;
+        break;
+    case 11:
+        *nTrain = 3;
+        *nType = TYPE_AIGUILLAGE;
+        break;
+    case 12:
+        *nTrain = 4;
+        *nType = TYPE_TRONCON;
+        break;
+    case 13:
+        *nTrain = 4;
+        *nType = TYPE_AIGUILLAGE;
+        break;
+    case 14:
+        *nTrain = 4;
+        *nType = TYPE_INVERSION;
+        break;
+    case 15:
+        *nTrain = 2;
+        *nType = TYPE_TRONCON;
+        break;
+    case 16:
+        *nTrain = 2;
+        *nType = TYPE_AIGUILLAGE;
+        break;
+    default:
+        printf("reponseXway : nMot inconnu\n");
+        return -1;
+        break;
+    }
+
+    /* Cf. TP
+
+    | Adresse | Nom            | Description                                        |
+    |---------|----------------|----------------------------------------------------|
+    | %MW8    | AckTroncTr1    | Valeur du capteur d'arrivée sur le tronçon suivant |
+    | %MW9    | AckTAigTr1     | Code requête envoyé pour demander le service       |
+    | %MW10   | AckTroncTr3    | Valeur du capteur d'arrivée sur le tronçon suivant |
+    | %MW11   | AckTAigTr3     | Code requête envoyé pour demander le service       |
+    | %MW12   | AckTroncTr4    | Valeur du capteur d'arrivée sur le tronçon suivant |
+    | %MW13   | AckTAigTr4     | Code requête envoyé pour demander le service       |
+    | %MW14   | AckInvTr4      | Code requête envoyé pour demander le service       |
+    | %MW15   | AckTroncTr2    | Valeur du capteur d'arrivée sur le tronçon suivant |
+    | %MW16   | AckTAigTr2     | Code requête envoyé pour demander le service       |
+    
+    */
+
+
+    free(recu);
+    free(requete);
+    free(trameBinaire);
+
+    return 0;
+}
+
+    
+int getIPXwaySrc(){
+    FILE *fichier;
+    int ipXwaySrc;
+    CHECK_NULL(fichier = fopen("IP_XWAY_SRC", "r"), "fopen(XP_XWAY_SRC)");
+    
+    fscanf(fichier, "%d", &ipXwaySrc);
+
+    DEBUG_PRINT("getIPXwaySrc : ipXwaySrc=%d\n", ipXwaySrc);
+
+    fclose(fichier);
+    return ipXwaySrc;
+}
+
+int troncon(int sd, int nTrain, int codeTroncon){
+    // Faire allumage troncon
+    CHECK(allumageTroncon(sd, nTrain, codeTroncon), "Allumage troncon fail n");
+    printf("Troncon : Allumage troncon reussi\n");
+
+    int nTrainRecu=-1, nType=-1, nCapteur=-1;
+    CHECK(reponseXway(sd, &nTrainRecu, &nType, &nCapteur), "Reponse Xway fail");
+
+    printf("Troncon retour : Train=%d et capteur=%d\n", nTrain, nCapteur);
+
+    return (nType == TYPE_TRONCON) -1;
+}
+
+
+
+int aiguillage(int sd, int nTrain, int codeAig){
+    // Essai changement aiguillage
+    CHECK(changementAiguillage(sd, nTrain, codeAig), "Changement aiguillage fail n");
+    printf("Aiguillage : Changement aiguillage reussi\n");
+
+    int nTrainRecu=-1, nType=-1, codeRequete=-1;
+    CHECK(reponseXway(sd, &nTrainRecu, &nType, &codeRequete), "Reponse Xway fail");
+    // Voir pour l'interface
+
+    printf("Aiguillage retour : Train=%d et code requete=%d\n", nTrain, codeRequete);
+    return (nType == TYPE_AIGUILLAGE && codeAig == codeRequete) -1;
+}
 
 
 int main(int argc, char const *argv[])
@@ -133,11 +343,13 @@ int main(int argc, char const *argv[])
     int sd1; //descripteur de socket de dialogue
     struct sockaddr_in addrServ;
     
+    
+
     //Etape 1 - Creation de la socket
 
     sd1 = socket(AF_INET, SOCK_STREAM, 0);
 
-    CHECK(sd1, "Creation fail !!!\n");
+    CHECK(sd1, "Creation fail n");
 
     //Etape2 - Adressage du destinataire
 
@@ -148,14 +360,18 @@ int main(int argc, char const *argv[])
 
     //Etape 3 - demande d'ouverture de connexion
     printf("IP_DEST : %s, PORT_DEST: %d\n", IP_DEST, PORT_DEST);
-    CHECK(connect(sd1, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)), "Connexion fail !!!\n");
+    CHECK(connect(sd1, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)), "connect(adddServ) fail\n");
     printf("Connexion reussie\n");
 
-    CHECK(changementAiguillage(sd1, 1, 22), "Changement aiguillage fail !!!\n");
-    printf("Changement aiguillage reussi\n");
+   
 
     // Faire allumage troncon
-    // faire demande de localisation du train avec gestion de la reponse en lisant la chaine recu.
+    CHECK(troncon(sd1, 1, 10), "Main : Troncon fail");
+
+    // Essai changement aiguillage
+    CHECK(aiguillage(sd1, 3, 3), "Main : Changement aiguillage fail");
+
+
     
     
     close(sd1);

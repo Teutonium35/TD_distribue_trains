@@ -1,0 +1,62 @@
+Requete allumage troncon 3 pour train 1 : 
+00000001001600f129100e100910370668072700030029000300ffff
+
+
+Encapsulation Xway : 00000001001600  
+0000000100  --> Identifiant MobusTCP/IP
+16          --> nombre de bit a partir du prochain jusqu'a la fin (en hexa)
+00          --> séparateur avant Adressage
+
+Adressage Xway : f129100e100910 
+f1          --> Type adressage (f0 3 niveaux, f1 5 niveaux)
+29          --> Adresse Xway src (ici 41 =0x29 pour mon ip)
+10          --> porte sys émetteur (toujours 10) 
+0e          --> Adresse Xway dest (ici 14=0x0e ip controlleur train)
+10          --> porte sys émetteur (toujours 10)     
+09          --> Émetteur de la requete en adressage 5 niveaux (1E pour répondre à la requete en ack)
+10          --> id de requete pour pas envoyer plusieur message sur le meme (rd entre nTrain*10 et nTrain*10 -1)
+
+
+
+Data : 370668072700030029000300ffff
+37          --> Code requete (toujours 37 pour écrire des mots, 24 pour allumer etc page 50 cours Xway)
+06          --> Catégorie PC (toujours pareil)
+68          --> Segment Mémoire (toujours pareil)
+07          --> Mots interne (toujours pareil)
+2700        --> adresse Premier mot (ici train 1 39=0x27) voir tp 
+0300        --> Nb mots a écrire
+2900        --> Adresse PC station du train (ici 2900 = 0x29=41 car mon pc jouai le role de train)
+0300        --> code troncon
+ffff        --> code aiguillage
+
+
+
+Requete API retour apres requete troncon 3 pour train 1 :  00000001001200f10e102910091037076807080001001800
+
+Encapsulation Xway : 00000001001600 
+Adressage Xway : f10e1029100910 
+
+
+
+Data : 37076807 0800 0100 7400
+37          --> Code requete (toujours 37 pour écrire des mots, 24 pour allumer etc page 50 cours Xway)
+07          --> Catégorie API (toujours pareil)
+68          --> Segment Mémoire (toujours pareil)
+07          --> Mots interne (toujours pareil)
+0800        --> adresse Premier mot (ici train 1 ack troncon 0800 = 0x8 = 8) voir tp 
+0100        --> Nb mots a écrire
+1800        --> Valeur du capteur à l’entrée du tronçon de destination (ici 1800=0x18=24 indique que le train est arrive sur le troncon 23)
+
+
+Reponse a créer pour l'ack : 00000001000800f129100e101e10
+
+Encapsulation Xway : 00000001000800  
+
+Adressage Xway : f129100e101e10
+f1          --> Type adressage (f0 3 niveaux, f1 5 niveaux)
+29          --> Adresse Xway src (ici 41 =0x29 pour mon ip)
+10          --> porte sys émetteur (toujours 10) 
+0e          --> Adresse Xway dest (ici 14=0x0e ip controlleur train)
+10          --> porte sys émetteur (toujours 10)     
+1E          --> Récepteur de la requete en adressage 5 niveaux
+10          --> id de requete pour pas envoyer plusieur message sur le meme 
