@@ -17,10 +17,10 @@ char *creationRequete(int  ipSrc, int ipDest, int cree, int idRequete, char * re
     char *requeteStrIntermediaire = (char *) malloc(100);
     int longueur = 0;
 
-    sprintf(adressageRequete, "f1%02x10%02x10%s%02x", ipSrc, ipDest, (cree ==1) ? "09": "1e", idRequete);
+    sprintf(adressageRequete, "f1%02x10%02x10%s%02x%s", ipSrc, ipDest, (cree ==1) ? "09": "19", idRequete, requete);
 
     if (cree == 1){
-        sprintf(requeteStrIntermediaire, "%s%s06%s", adressageRequete, requete, ecriture);
+        sprintf(requeteStrIntermediaire, "%s06%s", adressageRequete, ecriture);
     } else {
         sprintf(requeteStrIntermediaire, "%s", adressageRequete);
     }
@@ -88,10 +88,10 @@ char * ecritureMots(int nTrain, int ipXway, int codeTroncon, int codeAig){
         addrMot1 = 42; 
         break;
     case 3:
-        addrMot1 = 45;
+        addrMot1 = 49;
         break;
     case 4: 
-        addrMot1 = 48;  
+        addrMot1 = 52;  
         break;
     default:
         break;
@@ -189,7 +189,7 @@ int reponseXway(int sd, int *nTrain, int *nType, int *nCapteur){
     char *requete; 
     int ipXwaySrc = getIPXwaySrc();
 
-    requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 0, idRequete, NULL,   NULL); 
+    requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 0, idRequete, "fe",   NULL); 
     DEBUG_PRINT("reponseXway : Requete=%s\n", requete);
 
     tailleRequete = strlen(requete); 
@@ -337,7 +337,7 @@ int aiguillage(int sd, int nTrain, int codeAig){
 }
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char const *argv[]) 
 {   
     
     int sd1; //descripteur de socket de dialogue
@@ -355,7 +355,7 @@ int main(int argc, char const *argv[])
 
     addrServ.sin_family=AF_INET;
     addrServ.sin_port=htons(PORT_DEST); 
-    addrServ.sin_addr.s_addr=inet_addr(IP_DEST);
+    addrServ.sin_addr.s_addr=inet_addr(IP_DEST); 
 
 
     //Etape 3 - demande d'ouverture de connexion
@@ -365,14 +365,28 @@ int main(int argc, char const *argv[])
 
    
 
-    // Faire allumage troncon
+    // Trajet train 1 OK
+    //  T3 vers T23
+    CHECK(aiguillage(sd1, 1, 31), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 1, 3), "Main : Troncon fail");
+
+    // T23 vers Ti10
+    CHECK(aiguillage(sd1, 1, 22), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 1, 23), "Main : Troncon fail");
+
+    // Ti10 vers T29
+    CHECK(aiguillage(sd1, 1, 33), "Main : Changement aiguillage fail");
     CHECK(troncon(sd1, 1, 10), "Main : Troncon fail");
 
-    // Essai changement aiguillage
-    CHECK(aiguillage(sd1, 3, 3), "Main : Changement aiguillage fail");
+    // T29 vers T19
+    CHECK(aiguillage(sd1, 1, 3), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 1, 29), "Main : Troncon fail");
+
+    // T19 vers T3
+    CHECK(troncon(sd1, 1, 19), "Main : Troncon fail");
 
 
-    
+
     
     close(sd1);
     return 0;
