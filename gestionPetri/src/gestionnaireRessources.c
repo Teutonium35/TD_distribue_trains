@@ -12,24 +12,26 @@
 #define PORT 8080
 #define MAX_CLIENTS 10
 
-
-extern pthread_mutex_t resources[22];  // Ensemble des ressources, tout train confondu
+extern pthread_mutex_t resources[100];  // Ensemble des ressources, tout train confondu
 
 pthread_t thread_R1;
+pthread_t thread_R2;
 
 int main() {
     int server_fd, client_socket;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
-    // Initialisation des mutex : ici il faudra distinguer quelles sont les mutex avec ou sans ressource à l'initialisation
-    for (int i = 0; i < 20; i++) {
+    // Initialisation des mutex 
+    for (int i = 0; i < 100; i++) {
         pthread_mutex_init(&resources[i], NULL);
     }
 
-    for(int i=0; i<20; i++)
+    // la boucle for suivante sert à bloquer les ressources qui sont initialiement "vides"
+    for(int i=0; i<100; i++)
     {
-        if(i != R1_free && i != Req_R1_TR)
+        // pthread_mutex_lock(&resources[i]); // il y a un problème : le réseau de Petri ne devrait pas évoluer avec des ressources bloquées
+        if(i != R1_free && i != Req_R1_TR && i!= R2_free && i != Req_R2_TJ)
         {
             pthread_mutex_lock(&resources[i]);
         }
@@ -37,6 +39,9 @@ int main() {
 
     pthread_create(&thread_R1, NULL, gestion_R1, NULL);
     pthread_detach(thread_R1);
+
+    pthread_create(&thread_R2, NULL, gestion_R2, NULL);
+    pthread_detach(thread_R2);
 
     /************************************/
              // Partie serveur //

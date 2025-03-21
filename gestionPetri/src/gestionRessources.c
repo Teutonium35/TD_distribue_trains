@@ -147,3 +147,106 @@ void* gestion_R1(void* arg) {
     }
    return NULL;
 }
+
+// Réseau de Petri de la ressource 2
+void* gestion_R2(void* arg) {
+    
+    int* r2_tv_alloc = malloc(2*sizeof(int));
+    r2_tv_alloc[0] = R1_free;
+    r2_tv_alloc[1] = Req_R1_TR;
+    // il manque la ressource R5_free pour le moment !
+
+    int* r2_tv_rest = malloc(2*sizeof(int));
+    r2_tv_rest[0] = R2_TV_Wait;
+    r2_tv_rest[1] = Res_R2_TV;
+
+    int* r2_tj_alloc = malloc(2*sizeof(int));
+    r2_tj_alloc[0] = R2_free;
+    r2_tj_alloc[1] = Req_R2_TJ;
+    // il manque les ressources R3_free et R6_free pour le moment !
+
+    int* r2_tj_rest = malloc(2*sizeof(int));
+    r2_tj_rest[0] = R2_TJ_Wait;
+    r2_tj_rest[1] = Res_R2_TJ;
+
+    int* r2_tb_alloc = malloc(2*sizeof(int));
+    r2_tb_alloc[0] = Req_R2_TB;
+    r2_tb_alloc[1] = R2_free;
+
+
+    int* r2_tb_rest = malloc(2*sizeof(int));
+    r2_tb_rest[0] = R2_TB_Wait;
+    r2_tb_rest[1] = Res_R2_TB;
+
+    // pour l'instant on considère que la transition est faite à chaque fois instantanément
+    int R2_TV_Alloc = 1; // transition
+    int R2_TV_Rest = 1; // transition
+    int R2_TJ_Alloc = 1; // transition
+    int R2_TJ_Rest = 1; // transition
+    int R2_TB_Alloc = 1; // transition
+    int R2_TB_Rest = 1; // transition
+
+    while(1)
+    {
+        if(R2_TV_Alloc)
+        {
+            if(prendRessource(r2_tv_alloc,2) == 0)
+            {
+                lacheRessource(R2_TV_Wait);
+                lacheRessource(Ach_R2_TV);
+                printf("Ressource 2 est dans l'état R2_TV_Wait \n");
+            }
+        }
+
+        if(R2_TV_Rest)
+        {
+            if(prendRessource(r2_tv_rest,2) == 0)
+            {
+                lacheRessource(Rach_R2_TV);
+                lacheRessource(R2_free);
+                printf("Ressource 2 est dans l'état R2_free \n");
+            }
+        }
+
+        if(R2_TJ_Alloc)
+        {
+            if(prendRessource(r2_tj_alloc ,2) == 0)
+            {
+                lacheRessource(Ach_R2_TJ); // sur le réseau de Petri c'est RAch_R1_TV, je pense que c'est une erreur
+                lacheRessource(R2_TJ_Wait);
+                printf("Ressource 2 est dans l'état R2_TJ_Wait \n");
+            }
+        }
+
+        if(R2_TJ_Rest)
+        {
+            if(prendRessource(r2_tj_rest ,2) == 0)
+            {
+                lacheRessource(Rach_R1R2_TJ); // sur le réseau de Petri c'est RAch_R1R2_TV, je pense que c'est une erreur
+                lacheRessource(R2_free);
+                printf("Ressource 2 est dans l'état R2_free \n");
+            }
+        }
+
+        if(R2_TB_Alloc)
+        {
+            if(prendRessource(r2_tb_alloc ,2) == 0)
+            {
+                lacheRessource(Ach_R2_TB);
+                lacheRessource(R2_TB_Wait);
+                printf("Ressource 2 est dans l'état R2_TB_Wait \n");
+            }
+        }
+
+        if(R2_TB_Rest)
+        {
+            if(prendRessource(r2_tb_rest ,2) == 0)
+            {
+                lacheRessource(Rach_R2_TB);
+                lacheRessource(R2_free);
+                printf("Ressource 2 est dans l'état R2_free \n");
+            }
+        }
+    }
+   return NULL;
+}

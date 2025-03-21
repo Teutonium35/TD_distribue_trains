@@ -7,7 +7,7 @@
 #include <math.h>
 #include <gestionMutex.h>
 
-pthread_mutex_t resources[22];  // Ensemble des ressources, tout train confondu
+pthread_mutex_t resources[100];  // Ensemble des ressources, tout train confondu
 
 int prendRessource(int*r, int nombreRessourcesDemandées)
 {
@@ -15,14 +15,14 @@ int prendRessource(int*r, int nombreRessourcesDemandées)
     {
         if(pthread_mutex_trylock(&resources[r[i]]) != 0)
         {
-            for(int j=0; j<i+1;j++) // verifier l'indice j<i+1
+            for(int j=0; j<i;j++) // vérifier l'indexage !
             {
                 pthread_mutex_unlock(&resources[r[j]]);
-                printf(" Toutes les mutex ne sont pas dispos : on relaĉhe la ressource %d \n", r[j]+1);
+                // printf(" Toutes les mutex ne sont pas dispos : on relaĉhe la ressource %d \n", r[j]+1);
             }
             return 1;
         }
-        printf("Ressource %d allouée \n", r[i] + 1);
+        // printf("Ressource %d allouée \n", r[i] + 1);
     }
     return 0;
 }
