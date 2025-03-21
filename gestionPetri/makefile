@@ -1,13 +1,15 @@
-all : gestionnaireTrains1 gestionnaireTrains2 gestionnaireRessources
+CFLAGS = -Wall -Wextra -g -I./include
 
-gestionnaireTrains1 : gestionnaireTrains1.c
-	gcc $^ -o $@ -lm
+all : bin/gestionnaireTrains1 bin/gestionnaireTrains2 bin/gestionnaireRessources
 
-gestionnaireTrains2 : gestionnaireTrains2.c
-	gcc $^ -o $@ -lm
+bin/gestionnaireTrains1 : src/gestionnaireTrains1.c
+	gcc $(CFLAGS) $^ -o $@ -lm
 
-gestionnaireRessources : gestionnaireRessources.c
-	gcc $^ -o $@ -pthread -lm
+bin/gestionnaireTrains2 : src/gestionnaireTrains2.c
+	gcc $(CFLAGS) $^ -o $@ -lm
+
+bin/gestionnaireRessources : src/gestionnaireRessources.c src/gestionMutex.c src/gestionRessources.c src/gestionCommunication.c
+	gcc $(CFLAGS) $^ -o $@ -pthread -lm
 
 clean:
-	rm -rf gestionnaireTrains1 gestionnaireTrains2 gestionnaireRessources
+	rm -rf bin/gestionnaireTrains1 bin/gestionnaireTrains2 bin/gestionnaireRessources
