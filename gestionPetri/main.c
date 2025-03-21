@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define IP_DEST         "10.31.125.14"
+#define IP_SRC          "172.31.70.183"
+#define PORT_DEST       502
+
+#define CHECKERROR(var,val,msg)     if (var==val) {perror(msg); exit(1);}
+
+char *creationRequete(char * requete, int idRequete, char * ecriture, int  ipSrc, int ipDest, int cree){
+    char *requeteStr = (char *) malloc(100);
+    char *requeteStrIntermediaire = (char *)malloc(100);
+    int longueur = 0;
+
+    sprintf(requeteStrIntermediaire, "f1%02x10%02x10%s%02x%s06%s", ipSrc, ipDest, (cree ==1) ? "09": "1e", idRequete, requete, ecriture);
+
+    longueur = strlen(requeteStrIntermediaire)/2;
+
+    sprintf(requeteStr, "0000000100%02x00%s", longueur +1, requeteStrIntermediaire);
+    free(requeteStrIntermediaire);
+    return requeteStr;
+}
+
+char * conversionAscii2Binaire(char * trame, int lgl){
+    char * binaire = (char *) malloc(lgl / 2 * sizeof(char));
+    
+    for(int i = 0; i < lgl / 2; i++){
+        char high = trame[2 * i];
+        char low = trame[2 * i + 1];
+        
+        high = (high >= '0' && high <= '9') ? high - '0' : (high >= 'A' && high <= 'F') ? high - 'A' + 10 : high - 'a' + 10;
+        low = (low >= '0' && low <= '9') ? low - '0' : (low >= 'A' && low <= 'F') ? low - 'A' + 10 : low - 'a' + 10;
+        
+        binaire[i] = (high << 4) + low;
+    }
+
+    return binaire;
+}
+
+char * conversionBinaire2Ascii(char * binaire, int lgl){
+    char * ascii = (char *) malloc(2 * lgl * sizeof(char));
+
+    for(int i = 0; i < lgl; i++){
+        ascii[2*i] = ((binaire[i] >> 4) & 0x0F) + (((binaire[i] >> 4) & 0x0F) < 10 ? '0' : 'A' - 10);
+        ascii[2*i + 1] = (binaire[i] & 0x0F) + ((binaire[i] & 0x0F) < 10 ? '0' : 'A' - 10);
+    }
+    ascii[2 * lgl] = '\0';
+
+    return ascii;
+}
+
+void afficherBinaire(char * binaire, int lgl){
+    for(int i = 0; i < lgl; i++){
+        printf("%d ", binaire[i]);
+    }
+    printf("\n");
+}
+
+
+int main(int argc, char const *argv[])
+{
+    //char *requete = creationRequete("24", 1, "", 41, 14, 1); // start 24 et stop 25 avec ecriture ""
+    char *requete = creationRequete("37", 1, "68076400030009000a00d107", 41, 14, 1); // 37 pour envoyer des mots  poids faible en premier puis poids fort genre 2001 -> 0x7d1 donc eciture 1d07
+    char *trameBinaire = conversionAscii2Binaire(requete, strlen(requete));
+
+    printf("requete : %s\n", requete);
+    //afficherBinaire(trameBinaire, strlen(requete)/2);
+
+    
+    int sd1; //descripteur de socket de dialogue
+    struct sockaddr_in addrServ;
+    int adrlg = sizeof(struct sockaddr_in);
+    int nbcar;
+    char buff[100];
+
+    //Etape 1 - Creation de la socket
+
+    sd1 = socket(AF_INET, SOCK_STREAM, 0);
+
+    CHECKERROR(sd1,-1, "Creation fail !!!\n");
+
+    //Etape2 - Adressage du destinataire
+
+    addrServ.sin_family=AF_INET;
+    addrServ.sin_port=htons(PORT_DEST);
+    addrServ.sin_addr.s_addr=inet_addr(IP_DEST);
+
+
+    //Etape 3 - demande d'ouverture de connexion
+
+    CHECKERROR(connect(sd1, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)),-1, "Connexion fail !!!\n");
+    printf("Connexion reussie\n");
+
+    CHECKERROR(send(sd1, trameBinaire, strlen(requete)/2, 0), -1, "Envoi fail !!!\n");
+    printf("Envoi reussi\n");
+
+    nbcar = recvfrom(sd1,buff, 100, 0, NULL, NULL);
+    // afficherBinaire(buff, nbcar);
+    printf("Reponse: '%s' \n", conversionBinaire2Ascii(buff, nbcar));
+    
+    close(sd1);
+    free(requete);
+    free(trameBinaire);
+
+    return 0;
+}
