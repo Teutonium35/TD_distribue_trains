@@ -7,7 +7,7 @@
 #include <math.h>
 #include <gestionMutex.h>
 
-pthread_mutex_t resources[100];  // Ensemble des ressources, tout train confondu
+pthread_mutex_t resources[NOMBRE_RESSOURCES];  // Ensemble des ressources, tout train confondu
 
 int prendRessource(int*r, int nombreRessourcesDemandées)
 {
