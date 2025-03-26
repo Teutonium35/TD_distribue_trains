@@ -17,10 +17,10 @@ bin/mainDEBUG: $(SRC)
 	@gcc $(CSTFLAGS) $(CFLAGS) $^ -o $@ $(LIBS)
 
 bin/messagerieTrainApi: src/messagerieTrainApi.c
-	@gcc $(CFLAGS) $^ -o $@ $(LIBS)
+	gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
 bin/messagerieTrainApiDEBUG: src/messagerieTrainApi.c
-	@gcc $(CSTFLAGS) $(CFLAGS) $^ -o $@ $(LIBS)
+	gcc $(CSTFLAGS) $(CFLAGS) $^ -o $@ $(LIBS)
 
 bin/messagerieTrainApiTEST: src/messagerieTrainApi.c
 	@gcc $(CSTFLAGS) -DTEST $(CFLAGS) $^ -o $@ $(LIBS)

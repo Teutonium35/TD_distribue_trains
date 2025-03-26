@@ -317,7 +317,7 @@ int troncon(int sd, int nTrain, int codeTroncon){
     CHECK(reponseXway(sd, &nTrainRecu, &nType, &nCapteur), "Reponse Xway fail");
 
     printf("Troncon retour : Train=%d et capteur=%d\n", nTrain, nCapteur);
-
+    printf("Troncon nType=%d\n", nType);
     return (nType == TYPE_TRONCON) -1;
 }
 
@@ -336,6 +336,115 @@ int aiguillage(int sd, int nTrain, int codeAig){
     return (nType == TYPE_AIGUILLAGE && codeAig == codeRequete) -1;
 }
 
+void train1(int sd1){
+    // Trajet train 1 OK
+    //  T3 vers T23
+    CHECK(aiguillage(sd1, 1, 31), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 1, 3), "Main : Troncon fail");
+
+    // T23 vers Ti10
+    CHECK(aiguillage(sd1, 1, 22), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 1, 23), "Main : Troncon fail");
+
+    // Ti10 vers T29
+    CHECK(aiguillage(sd1, 1, 33), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 1, 10), "Main : Troncon fail");
+
+    // T29 vers T19
+    CHECK(aiguillage(sd1, 1, 3), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 1, 29), "Main : Troncon fail");
+
+    // T19 vers T3
+    CHECK(troncon(sd1, 1, 19), "Main : Troncon fail");
+}
+
+void train2(int sd1){
+    // Trajet train 2 OK
+    //  Ti04 vers T22
+    CHECK(troncon(sd1, 2, 4), "Main : Troncon fail");
+
+    // T22 vers T27
+    CHECK(aiguillage(sd1, 2, 7), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 2, 22), "Main : Troncon fail");
+
+    // T27 vers T28
+    CHECK(troncon(sd1, 2, 27), "Main : Troncon fail");
+
+    // T28 vers Ti9
+    CHECK(aiguillage(sd1, 2, 13), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 2, 28), "Main : Troncon fail");
+
+    // Ti09 vers T24
+    CHECK(aiguillage(sd1, 2, 12), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 2, 9), "Main : Troncon fail");
+
+    // T24 vers Ti04
+    CHECK(aiguillage(sd1, 2, 20), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 2, 24), "Main : Troncon fail");
+}
+
+void train3(int sd1){
+    // Trajet train 2 OK
+    //  Ti00 vers T13
+    CHECK(aiguillage(sd1, 3, 0), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 3, 0), "Main : Troncon fail");
+
+    // T13 vers T20
+    CHECK(troncon(sd1, 3, 13), "Main : Troncon fail");
+
+    // T20 vers T30
+    // Peut etre aiguillage PA2
+    CHECK(troncon(sd1, 3, 20), "Main : Troncon fail");
+
+    // T30 vers Ti9
+    CHECK(aiguillage(sd1, 3, 14), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 3, 30), "Main : Troncon fail");
+
+    // Ti09 vers T31
+    CHECK(aiguillage(sd1, 3, 13), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 3, 9), "Main : Troncon fail");
+
+    // T31 vers T26
+    CHECK(troncon(sd1, 3, 31), "Main : Troncon fail");
+
+    // T26 vers T15
+    CHECK(aiguillage(sd1, 3, 21), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 3, 26), "Main : Troncon fail");
+
+    // T15 vers T12
+    CHECK(aiguillage(sd1, 3, 1), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 3, 15), "Main : Troncon fail");
+
+    // T12 vers Ti00
+    CHECK(troncon(sd1, 3, 12), "Main : Troncon fail");
+}
+
+void train4(int sd1){
+    
+    //  Ti07 vers T29
+    CHECK(aiguillage(sd1, 4, 10), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 4, 7), "Main : Troncon fail");
+
+    // T29 vers Ti09
+    CHECK(aiguillage(sd1, 4, 33), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 4, 29), "Main : Troncon fail");
+
+    // Ti09 vers T28
+    CHECK(aiguillage(sd1, 4, 13), "Main : Changement aiguillage fail");
+    troncon(sd1, 4, 49);
+    CHECK(troncon(sd1, 4, 9), "Main : Troncon 9 fail");
+
+    // T28 vers T27
+    CHECK(troncon(sd1, 4, 28), "Main : Troncon fail");
+
+    // T27 vers Ti07
+    CHECK(aiguillage(sd1, 4, 23), "Main : Changement aiguillage fail");
+    CHECK(troncon(sd1, 4, 27), "Main : Troncon fail");
+
+    // Ti07 vers fin + inversion
+    CHECK(troncon(sd1, 4, 37), "Main : Troncon fail");
+    troncon(sd1, 4, 47);
+}
 
 int main(int argc, char const *argv[]) 
 {   
@@ -365,25 +474,18 @@ int main(int argc, char const *argv[])
 
    
 
-    // Trajet train 1 OK
-    //  T3 vers T23
-    CHECK(aiguillage(sd1, 1, 31), "Main : Changement aiguillage fail");
-    CHECK(troncon(sd1, 1, 3), "Main : Troncon fail");
+    for (int i = 0; i < 2; i++)
+    {
+        train1(sd1);
+        train2(sd1);
+        train3(sd1);
+        train4(sd1);
+    }
+    
+    
+    
 
-    // T23 vers Ti10
-    CHECK(aiguillage(sd1, 1, 22), "Main : Changement aiguillage fail");
-    CHECK(troncon(sd1, 1, 23), "Main : Troncon fail");
 
-    // Ti10 vers T29
-    CHECK(aiguillage(sd1, 1, 33), "Main : Changement aiguillage fail");
-    CHECK(troncon(sd1, 1, 10), "Main : Troncon fail");
-
-    // T29 vers T19
-    CHECK(aiguillage(sd1, 1, 3), "Main : Changement aiguillage fail");
-    CHECK(troncon(sd1, 1, 29), "Main : Troncon fail");
-
-    // T19 vers T3
-    CHECK(troncon(sd1, 1, 19), "Main : Troncon fail");
 
 
 
