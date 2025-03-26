@@ -109,27 +109,6 @@ enum res
     Rach_R6_TR,
 
     //*** Réseau de Petri du train 1 ***//
-
-    T1_0,
-    T1_1,
-    T1_2,
-    T1_3,
-    T1_4,
-    T1_5,
-    T1_6,
-    T1_7,
-    T1_8,
-    T1_9,
-    T1_10,
-    T1_11,
-    T1_12,
-    T1_13,
-    T1_14,
-    T1_15,
-    Req_Aiguillage_T1,
-    Ach_Aiguillage_T1,
-    Req_Troncons_T1,
-    Ack_Troncons_T1
 };
 
 int prendRessource(int*, int);

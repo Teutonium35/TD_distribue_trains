@@ -111,38 +111,10 @@ int utiliseRessource(int* r, int nombreRessourcesDemandées) {
 
 void* gestion_T1(void* arg)
 {
-    int* transition1 = malloc(sizeof(int));
-    transition1[0] = T1_0;
-
-    int* transition2 = malloc(2*sizeof(int));
-    transition2[0] = T1_1;
-    transition2[1] = Ach_Aiguillage_T1;
 
     while(1)
     {
-        sleep(1);
-
-        if(utiliseRessource(transition1,1) == 0)
-        {
-            genereRessource(Req_Aiguillage_T1);
-            genereRessource(T1_1);
-            printf("Le train 1 est dans l'état T1_1 \n");
-        }
-        else
-        {
-            printf("Le train 1 ne peut pas passer la première transition \n");
-        }
-
-        if(utiliseRessource(transition2,2) == 0)
-        {
-            genereRessource(Req_Troncons_T1);
-            genereRessource(T1_2);
-            printf("Le train 1 est dans l'état T1_2 \n");
-        }
-        else
-        {
-            printf("Le train 1 ne peut pas passer la deuxième transition \n");
-        }
+        // faire de manière séquentielle
     }
 }
 
