@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "unistd.h": "c",
+        "utils.h": "c",
+        "socket.h": "c"
+    },
+    "cSpell.words": [
+        "addd",
+        "chaine",
+        "etre",
+        "nbcar",
+        "recu",
+        "reponse",
+        "Reponse",
+        "requete",
+        "reussi",
+        "reussie",
+        "Xway",
+        "XWAY"
+    ]
+}
