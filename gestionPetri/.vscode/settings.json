@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "gestionmutex.h": "c",
+        "gestionnairetrains.h": "c"
+    }
+}
