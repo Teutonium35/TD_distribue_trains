@@ -342,17 +342,27 @@ void train1(int sd1){
     CHECK(aiguillage(sd1, 1, 31), "Main : Changement aiguillage fail");
     CHECK(troncon(sd1, 1, 3), "Main : Troncon fail");
 
+    // Demander R4
+
     // T23 vers Ti10
     CHECK(aiguillage(sd1, 1, 22), "Main : Changement aiguillage fail");
     CHECK(troncon(sd1, 1, 23), "Main : Troncon fail");
+
+    // Libérer R4
+    // Demander R5 et R2
 
     // Ti10 vers T29
     CHECK(aiguillage(sd1, 1, 33), "Main : Changement aiguillage fail");
     CHECK(troncon(sd1, 1, 10), "Main : Troncon fail");
 
+    // Libère R2
+    // Demande R1
+
     // T29 vers T19
     CHECK(aiguillage(sd1, 1, 3), "Main : Changement aiguillage fail");
     CHECK(troncon(sd1, 1, 29), "Main : Troncon fail");
+
+    // Libère R1 et R5
 
     // T19 vers T3
     CHECK(troncon(sd1, 1, 19), "Main : Troncon fail");
