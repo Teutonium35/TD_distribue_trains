@@ -44,7 +44,7 @@ void* gestion_R1(void* arg) {
 
     int* r1_tj_rest_2 = malloc(2*sizeof(int));
     r1_tj_rest_2[0] = Res_R1_TJ_2;
-    r1_tj_rest_2[1] = Rach_R1_TJ_2;
+    r1_tj_rest_2[1] = R1_TJ_Wait_2;
 
 
     while(1)
@@ -164,7 +164,7 @@ void* gestion_R2(void* arg) {
 
         else if(prendRessource(r2_tj_rest ,2) == 0)
         {
-            lacheRessource(Rach_R1R2_TJ); // sur le réseau de Petri c'est Rach_R1R2_TV, je pense que c'est une erreur
+            lacheRessource(Rach_R2_TJ); // sur le réseau de Petri c'est Rach_R1R2_TV, je pense que c'est une erreur
             lacheRessource(R2_free);
             printf("Ressource 2 est dans l'état R2_free \n");
         }

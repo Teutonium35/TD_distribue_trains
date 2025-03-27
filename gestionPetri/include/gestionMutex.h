@@ -40,7 +40,7 @@ enum res
     Ach_R2_TJ,
     R2_TJ_Wait,
     Res_R2_TJ,
-    Rach_R1R2_TJ, // il y a écrit RAch_R1R2_TV sur le schéma, je pense que c'est une erreur
+    Rach_R2_TJ, // il y a écrit RAch_R1R2_TV sur le schéma, je pense que c'est une erreur
     Req_R2_TB,
     Ach_R2_TB,
     R2_TB_Wait,
