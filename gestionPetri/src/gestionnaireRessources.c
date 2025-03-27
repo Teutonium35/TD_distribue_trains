@@ -9,6 +9,13 @@
 #include <gestionMutex.h>
 #include <gestionCommunication.h>
 
+#define LOCALIP "127.0.0.1"
+#define LOCALPORT 3000
+#define MAXCAR  80
+
+#define CHECKERROR(var,val,msg)     if (var==val) {perror(msg); exit(1);}
+
+
 #define PORT 8080
 #define MAX_CLIENTS 10
 
@@ -21,7 +28,59 @@ pthread_t thread_R4;
 pthread_t thread_R5;
 pthread_t thread_R6;
 
+void * listen_msg(void * arg){
+    printf("thread lancé\n");
+    int sd = *(int *)arg;
+    free(arg);
+    int nbcar;
+    char buff[MAXCAR + 1];
+    while (1){
+
+        nbcar=recv(sd,buff, MAXCAR, 0);
+        if (nbcar){
+            printf("SERVEUR : '%s' \n", buff);
+        }
+    }
+}
+
 int main() {
+    int se; // descripteur de la socket d'ecoute    
+    struct sockaddr_in addrserv, addrcli;
+    socklen_t addrcli_len = sizeof(struct sockaddr);
+
+    //Etape 1 - Creation de la socket
+
+    se=socket(AF_INET, SOCK_STREAM, 0);
+
+    CHECKERROR(se,-1, "Creation fail !!!\n");
+
+    //Etape2 - Adressage de la socket de la socket d'ecoute
+
+    addrserv.sin_family=AF_INET;
+    addrserv.sin_addr.s_addr=INADDR_ANY;//On recoit des data sur toutes les adresses IP de la machine
+
+    //Definition d'un port de dialogue du lecteur
+    addrserv.sin_port=htons(LOCALPORT);
+
+    //Etape 3 - Affectation de l'adresse a la socket avec controle d'erreur
+    CHECKERROR(bind(se, (const struct sockaddr *)&addrserv,sizeof(addrserv)), -1, "Erreur de bind !!!\n");
+
+    //Etape 4 - definir le nombre de connexions simultannees
+
+    listen(se,8);
+
+    for (int i = 0;i<4;i++){
+        pthread_t thread_id;
+        int *sd;
+        sd = malloc(sizeof(int));
+        *sd=accept(se, (struct sockaddr *) &addrcli, &addrcli_len); //le serveur se met a l'ecoute des demande de connexion
+        printf("Connexion acceptée %d\n", *sd);
+        CHECKERROR(*sd,-1, "L'ouverture de connexion n'a pas fonctionne !!!\n");
+        pthread_create(&thread_id, NULL, listen_msg, sd);
+        pthread_detach(thread_id);
+    }
+
+
     int server_fd, client_socket;
     struct sockaddr_in address;
     int addrlen = sizeof(address);

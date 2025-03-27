@@ -113,6 +113,13 @@ int utiliseRessource(int* r, int nombreRessourcesDemandées, int sock) {
 void* gestion_T1(void* arg)
 {
     int sock = *(int *)arg;
+    char buff[100];
+    sprintf(buff, "train 1");
+    while (1){
+        send(sock,buff, strlen(buff)+1, 0);
+        printf("%s\n", buff);
+        sleep(1);
+    }
     while(1)
     {
         //  T3 vers T23
@@ -204,6 +211,13 @@ void* gestion_T1(void* arg)
 void* gestion_T2(void* arg)
 {
     int sock = *(int *)arg;
+    char buff[100];
+    sprintf(buff, "train 2");
+    while (1){
+        send(sock,buff, strlen(buff)+1, 0);
+        printf("%s\n", buff);
+        sleep(1);
+    }
 
     while(1)
     {
@@ -276,6 +290,13 @@ void* gestion_T2(void* arg)
 void* gestion_T3(void* arg)
 {
     int sock = *(int *)arg;
+    char buff[100];
+    sprintf(buff, "train 3");
+    while (1){
+        send(sock,buff, strlen(buff)+1, 0);
+        printf("%s\n", buff);
+        sleep(1);
+    }
     while(1)
     {
         //  Ti00 vers T13
@@ -362,6 +383,13 @@ void* gestion_T3(void* arg)
 void* gestion_T4(void* arg)
 {
     int sock = *(int *)arg;
+    char buff[100];
+    sprintf(buff, "train 4");
+    while (1){
+        send(sock,buff, strlen(buff)+1, 0);
+        printf("%s\n", buff);
+        sleep(1);
+    }
     while(1)
     {
         // Attention : peut-être une couille au début avec le démarrage à Ti07
