@@ -35,6 +35,8 @@ int init_socket(struct sockaddr_in * addrServ, int * sd1){
     //Etape 3 - demande d'ouverture de connexion
 
     CHECKERROR(connect(*sd1, (const struct sockaddr *) addrServ, sizeof(struct sockaddr_in)),-1, "Connexion fail !!!\n");
+
+    return 0;
 }
 
 int main() {
@@ -44,6 +46,8 @@ int main() {
 
     init_socket(&addrServ, &sd1);
     init_socket(&addrServ, &sd2);
+
+    printf("sockets init\n");
 
     pthread_create(&thread_T1, NULL, gestion_T1, &sd1);
     pthread_create(&thread_T2, NULL, gestion_T2, &sd2);

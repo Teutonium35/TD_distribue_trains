@@ -35,10 +35,20 @@ void * listen_msg(void * arg){
     int nbcar;
     char buff[MAXCAR + 1];
     while (1){
-
+        // Lire la requête du client (indice de la ressource demandée)
         nbcar=recv(sd,buff, MAXCAR, 0);
-        if (nbcar){
-            printf("SERVEUR : '%s' \n", buff);
+        if (nbcar>0){
+            printf("SERVEUR : '%s', %d \n", buff, nbcar);
+            int resource_id = atoi(buff);  // Convertir en entier
+
+            // Créer un thread pour gérer la requête
+            pthread_t thread;
+            ClientRequest* request = malloc(sizeof(ClientRequest));
+            request->client_socket = sd;
+            request->resource_id = resource_id;
+
+            pthread_create(&thread, NULL, handle_client, request);
+            pthread_detach(thread);
         }
     }
 }
@@ -80,11 +90,6 @@ int main() {
         pthread_detach(thread_id);
     }
 
-
-    int server_fd, client_socket;
-    struct sockaddr_in address;
-    int addrlen = sizeof(address);
-
     // Initialisation des mutex 
     for (int i = 0; i < NOMBRE_RESSOURCES; i++) {
         pthread_mutex_init(&resources[i], NULL);
@@ -122,56 +127,7 @@ int main() {
     /************************************/
              // Partie serveur //
     /************************************/
-    // Création du socket
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == 0) {
-        perror("Erreur socket");
-        exit(EXIT_FAILURE);
-    }
-
-    // Configuration de l'adresse du serveur
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
-
-    if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
-        perror("Erreur bind");
-        exit(EXIT_FAILURE);
-    }
-
-    if (listen(server_fd, MAX_CLIENTS) < 0) {
-        perror("Erreur listen");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("Serveur en attente de connexions...\n");
-
     // Boucle d'acceptation des connexions clients
-    while (1) {
-        client_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-        if (client_socket < 0) {
-            perror("Erreur accept");
-            continue;
-        }
-
-        // Lire la requête du client (indice de la ressource demandée)
-        char buffer[1024] = {0};
-        read(client_socket, buffer, sizeof(buffer));
-        int resource_id = atoi(buffer);  // Convertir en entier
-
-        // Créer un thread pour gérer la requête
-        pthread_t thread;
-        ClientRequest* request = malloc(sizeof(ClientRequest));
-        request->client_socket = client_socket;
-        request->resource_id = resource_id;
-
-        pthread_create(&thread, NULL, handle_client, request);
-        pthread_detach(thread);
-    }
-
-    // Nettoyage des mutex (non atteint dans ce programme)
-    for (int i = 0; i < NOMBRE_RESSOURCES; i++) {
-        pthread_mutex_destroy(&resources[i]);
-    }
-
+    // On ne finit pas le programme, car il ne se finissait pas dans la version précédente et j'ai pas envie de tout casser
+    while(1);
 }

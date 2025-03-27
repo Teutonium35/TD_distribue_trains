@@ -37,6 +37,8 @@ int init_socket(struct sockaddr_in * addrServ, int * sd1){
     //Etape 3 - demande d'ouverture de connexion
 
     CHECKERROR(connect(*sd1, (const struct sockaddr *) addrServ, sizeof(struct sockaddr_in)),-1, "Connexion fail !!!\n");
+
+    return 1;
 }
 
 int main() {

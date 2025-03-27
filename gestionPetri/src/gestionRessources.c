@@ -9,7 +9,7 @@
 #include <gestionMutex.h>
 
 // Réseau de Petri de la ressource 1
-void* gestion_R1(void* arg) {
+void* gestion_R1() {
     
     int* r1_tr_alloc = malloc(3*sizeof(int));
     r1_tr_alloc[0] = R1_free;
@@ -108,7 +108,7 @@ void* gestion_R1(void* arg) {
 }
 
 // Réseau de Petri de la ressource 2
-void* gestion_R2(void* arg) {
+void* gestion_R2() {
     
     int* r2_tv_alloc = malloc(3*sizeof(int));
     r2_tv_alloc[0] = R2_free;
@@ -187,7 +187,7 @@ void* gestion_R2(void* arg) {
 }
 
 // Réseau de Petri de la ressource 3
-void* gestion_R3(void* arg) {
+void* gestion_R3() {
     
     int* r3_tr_alloc = malloc(2*sizeof(int));
     r3_tr_alloc[0] = R3_free;
@@ -264,7 +264,7 @@ void* gestion_R3(void* arg) {
 }
 
 // Réseau de Petri de la ressource 4
-void* gestion_R4(void* arg) {
+void* gestion_R4() {
     
     int* r4_tb_alloc = malloc(3*sizeof(int));
     r4_tb_alloc[0] = R3_free;
@@ -317,7 +317,7 @@ void* gestion_R4(void* arg) {
 }
 
 // Réseau de Petri de la ressource 5
-void* gestion_R5(void* arg) {
+void* gestion_R5() {
     
     int* r5_tv_alloc = malloc(3*sizeof(int));
     r5_tv_alloc[0] = R2_free;
@@ -371,7 +371,7 @@ void* gestion_R5(void* arg) {
 }
 
 // Réseau de Petri de la ressource 6
-void* gestion_R6(void* arg) {
+void* gestion_R6() {
     
     int* r6_tj_alloc = malloc(4*sizeof(int));
     r6_tj_alloc[0] = R6_free;

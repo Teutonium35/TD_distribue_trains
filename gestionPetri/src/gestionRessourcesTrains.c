@@ -10,6 +10,7 @@
 #include <gestionnaireTrains.h>
 #include <gestionMutex.h>
 #include <utils.h>
+#include <messagerieTrainApi.h>
 
 // Fonction pour demander une ressource en créant une nouvelle connexion
 
@@ -112,18 +113,13 @@ int utiliseRessource(int* r, int nombreRessourcesDemandées, int sock) {
 
 void* gestion_T1(void* arg)
 {
+    printf("debut train 1\n");
     int sock = *(int *)arg;
-    char buff[100];
-    sprintf(buff, "train 1");
-    while (1){
-        send(sock,buff, strlen(buff)+1, 0);
-        printf("%s\n", buff);
-        sleep(1);
-    }
+
     while(1)
     {
         //  T3 vers T23
-        CHECK(aiguillage(sock, 1, 31), "Main : Changement aiguillage fail");
+        CHECK(aiguillage(sock, 1, 31), "Main : Changement aiguillage fail 1 31\n");
         CHECK(troncon(sock, 1, 3), "Main : Troncon fail");
 
         genereRessource(Req_R4_TV,sock);
@@ -210,14 +206,9 @@ void* gestion_T1(void* arg)
 
 void* gestion_T2(void* arg)
 {
+    printf("debut train 2\n");
     int sock = *(int *)arg;
-    char buff[100];
-    sprintf(buff, "train 2");
-    while (1){
-        send(sock,buff, strlen(buff)+1, 0);
-        printf("%s\n", buff);
-        sleep(1);
-    }
+
 
     while(1)
     {
@@ -289,14 +280,9 @@ void* gestion_T2(void* arg)
 
 void* gestion_T3(void* arg)
 {
+    printf("debut train 3\n");
     int sock = *(int *)arg;
-    char buff[100];
-    sprintf(buff, "train 3");
-    while (1){
-        send(sock,buff, strlen(buff)+1, 0);
-        printf("%s\n", buff);
-        sleep(1);
-    }
+
     while(1)
     {
         //  Ti00 vers T13
@@ -382,17 +368,12 @@ void* gestion_T3(void* arg)
 // Doutes pour celui-là
 void* gestion_T4(void* arg)
 {
+    printf("debut train 4\n");
     int sock = *(int *)arg;
-    char buff[100];
-    sprintf(buff, "train 4");
-    while (1){
-        send(sock,buff, strlen(buff)+1, 0);
-        printf("%s\n", buff);
-        sleep(1);
-    }
+
     while(1)
     {
-        // Attention : peut-être une couille au début avec le démarrage à Ti07
+        // Attention : peut-être une couille au debut avec le démarrage à Ti07
 
         // Demande R1 et R5
         genereRessource(Req_R1_TJ_1,sock);
