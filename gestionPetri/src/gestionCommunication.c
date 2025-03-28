@@ -19,16 +19,16 @@ void* handle_client(void* arg) {
     if(resource_code > 0)
     {
         int nombreRessources = resource_code % 500;
-        int *ressources_demandées = malloc(sizeof(int)* nombreRessources);
+        int *ressources_demandees = malloc(sizeof(int)* nombreRessources);
         // on décode le message transmis pour en déduire les ressources demandées
         for(int i=0; i<nombreRessources; i++)
         {
-            ressources_demandées[i] = (resource_code / (int)pow(500,i+1)) % 500 - 1;
+            ressources_demandees[i] = (resource_code / (int)pow(500,i+1)) % 500 - 1;
         }
-        printf("Le client demande une ou des ressources par le code %d \n", resource_code);
+        //printf("Le client demande une ou des ressources par le code %d \n", resource_code);
 
         // on n'a pas pu prendre toutes les ressources 
-        if(prendRessource(ressources_demandées, nombreRessources) == 1)
+        if(prendRessource(ressources_demandees, nombreRessources) == 1)
         {
             snprintf(buffer, sizeof(buffer), "%d \n", 1); // envoi de '1' pour signifier que toutes les ressources demandées ne sont pas dispos
             send(client_socket, buffer, strlen(buffer), 0);
@@ -45,11 +45,20 @@ void* handle_client(void* arg) {
     }
     else
     {
-        resource_code = -resource_code -1;
+        resource_code = -resource_code; // -1;
         printf("Client libère la ressource %d\n", resource_code+1);
         // Libérer le mutex de la ressource demandée
+        // if(resource_code != Req_R4_TV)
+        // {
+        //     printf("On vient de libérer une autre ressource que req_R4_TV \n");
+        // }
+        // else
+        // {
+        //     printf("On vient de libérer la ressource req_R4_TV \n");
+        // }
+        // sleep(10);
         lacheRessource(resource_code);
-        printf("Ressource %d libérée \n", resource_code+1);
+        //printf("Ressource %d libérée \n", resource_code+1);
     }  
     // Envoyer la réponse au client
     // snprintf(buffer, sizeof(buffer), "Ressource %d allouée\n", resource_id);

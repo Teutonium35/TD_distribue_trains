@@ -113,3 +113,5 @@ enum res
 
 int prendRessource(int*, int);
 int lacheRessource(int);
+
+extern pthread_mutex_t resources[NOMBRE_RESSOURCES];  // Ensemble des ressources, tout train confondu

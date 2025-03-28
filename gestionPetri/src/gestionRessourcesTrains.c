@@ -37,7 +37,7 @@ int genereRessource(int r, int sock) {
 
     // Connexion au serveur
     if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        perror("Connexion échouée");
+        perror("Connexion échouée depuis genereRessource");
         close(sock);
         return -1;
     }
@@ -58,15 +58,14 @@ int genereRessource(int r, int sock) {
     return reponse;
 }
 
-// Fonction pour libérer une ressource en créant une nouvelle connexion
-int utiliseRessource(int* r, int nombreRessourcesDemandées, int sock) {
-    // int sock;
+int utiliseRessource(int* r, int nombreRessourcesDemandees, int sock_unused) {
+    int sock;  // Créer un nouveau socket pour chaque connexion
     struct sockaddr_in serv_addr;
     char message[1000000];
     char buffer[1024] = {0};
 
-    // // Création du socket pour cette requête
-    // sock = socket(AF_INET, SOCK_STREAM, 0);
+    // Création du socket pour cette requête
+    sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
         perror("Erreur socket");
         return -1;
@@ -83,30 +82,30 @@ int utiliseRessource(int* r, int nombreRessourcesDemandées, int sock) {
 
     // Connexion au serveur
     if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        perror("Connexion échouée");
+        perror("Connexion échouée depuis utiliseRessource");
         close(sock);
         return -1;
     }
 
-    int envoi = nombreRessourcesDemandées;
-    for(int i=0; i<nombreRessourcesDemandées; i++)
-    {
-        envoi += r[i] * pow(500,i+1); // on génère le nombre qui demande les ressources de r
+    int envoi = nombreRessourcesDemandees;
+    for (int i = 0; i < nombreRessourcesDemandees; i++) {
+        envoi += r[i] * pow(500, i + 1); // Générer le nombre qui demande les ressources de r
     }
-    printf("Valeur de envoi : %d \n", envoi);
+    //printf("Valeur de envoi : %d \n", envoi);
+
     // Envoi de la requête
-    snprintf(message, sizeof(message), "%d", envoi); // on envoie + le numéro de la ressource à libérer
+    snprintf(message, sizeof(message), "%d", envoi);
     send(sock, message, strlen(message), 0);
 
     // Attente de la réponse
     read(sock, buffer, sizeof(buffer));
-    printf("Réponse du serveur : %s\n", buffer);
+    //printf("Réponse du serveur : %s\n", buffer);
 
     int reponse;
     sscanf(buffer, "%d", &reponse);
-    printf("Valeur de reponse : %d \n", reponse);
+    //printf("Valeur de reponse : %d \n", reponse);
 
-    close(sock); // Fermer la connexion après chaque requête
+    close(sock); // Fermer le socket après chaque requête
     return reponse;
 }
 
@@ -116,10 +115,11 @@ void* gestion_T1(void* arg)
     while(1)
     {
         //  T3 vers T23
-        CHECK(aiguillage(sock, 1, 31), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 1, 3), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 1, 31), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 1, 3), "Main : Troncon fail");
 
         genereRessource(Req_R4_TV,sock);
+        sleep(1); // utilisé dans la simulation pour temporiser 
         int* transition1 = malloc(sizeof(int));
         *transition1 = Ach_R4_TV;
 
@@ -131,11 +131,12 @@ void* gestion_T1(void* arg)
         }
 
         // T23 vers Ti10
-        CHECK(aiguillage(sock, 1, 22), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 1, 23), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 1, 22), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 1, 23), "Main : Troncon fail");
 
         // Libérer R4
         genereRessource(Res_R4_TV,sock);
+        sleep(1);
         int* transition2 = malloc(sizeof(int));
         *transition2 = Rach_R4_TV;
         while(utiliseRessource(transition2, 1, sock) != 0) 
@@ -146,7 +147,9 @@ void* gestion_T1(void* arg)
 
          // Demander R5 et R2
         genereRessource(Req_R5_TV,sock);
+        sleep(1);
         genereRessource(Req_R2_TV,sock);
+        sleep(1);
         int* transition3 = malloc(2*sizeof(int));
         transition3[0] = Ach_R5_TV;
         transition3[1] = Ach_R2_TV;
@@ -157,11 +160,12 @@ void* gestion_T1(void* arg)
         }
 
         // Ti10 vers T29
-        CHECK(aiguillage(sock, 1, 33), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 1, 10), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 1, 33), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 1, 10), "Main : Troncon fail");
 
         // Libère R2
         genereRessource(Res_R2_TV,sock);
+        sleep(1);
         int* transition4 = malloc(sizeof(int));
         *transition4 = Rach_R2_TV;
         while(utiliseRessource(transition4, 1, sock) != 0) 
@@ -172,6 +176,7 @@ void* gestion_T1(void* arg)
 
         // Demande R1
         genereRessource(Req_R1_TV,sock);
+        sleep(1);
         int* transition5 = malloc(sizeof(int));
         *transition5 = Ach_R1_TV;
         while(utiliseRessource(transition5, 1, sock) != 0) 
@@ -181,12 +186,14 @@ void* gestion_T1(void* arg)
         }
 
         // T29 vers T19
-        CHECK(aiguillage(sock, 1, 3), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 1, 29), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 1, 3), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 1, 29), "Main : Troncon fail");
 
         // Libère R1 et R5
         genereRessource(Res_R1_TV,sock);
+        sleep(1);
         genereRessource(Res_R5_TV,sock);
+        sleep(1);
         int* transition6 = malloc(2*sizeof(int));
         transition6[0] = Rach_R1_TV;
         transition6[1] = Rach_R5_TV;
@@ -197,7 +204,7 @@ void* gestion_T1(void* arg)
         }
 
         // T19 vers T3
-        CHECK(troncon(sock, 1, 19), "Main : Troncon fail");
+        // CHECK(troncon(sock, 1, 19), "Main : Troncon fail");
     }
 }
 
@@ -208,11 +215,13 @@ void* gestion_T2(void* arg)
     while(1)
     {
         //  Ti04 vers T22
-        CHECK(troncon(sock, 2, 4), "Main : Troncon fail");
+        // CHECK(troncon(sock, 2, 4), "Main : Troncon fail");
 
         // Demande R1 et R6
         genereRessource(Req_R1_TR,sock);
+        sleep(1);
         genereRessource(Req_R6_TR,sock);
+        sleep(1);
         int* transition1 = malloc(2*sizeof(int));
         transition1[0] = Ach_R1_TR;
         transition1[1] = Ach_R6_TR;
@@ -223,14 +232,15 @@ void* gestion_T2(void* arg)
         }
 
         // T22 vers T27
-        CHECK(aiguillage(sock, 2, 7), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 2, 22), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 2, 7), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 2, 22), "Main : Troncon fail");
 
         // T27 vers T28
-        CHECK(troncon(sock, 2, 27), "Main : Troncon fail");
+        // CHECK(troncon(sock, 2, 27), "Main : Troncon fail");
 
         // Lache R1 
         genereRessource(Res_R1_TR,sock);
+        sleep(1);
         int* transition2 = malloc(sizeof(int));
         *transition2 = Rach_R1_TR;
         while(utiliseRessource(transition2, 1, sock) != 0) 
@@ -241,6 +251,7 @@ void* gestion_T2(void* arg)
 
         // Demande R3
         genereRessource(Req_R3_TR,sock);
+        sleep(1);
         int* transition3 = malloc(sizeof(int));
         *transition3 = Ach_R3_TR;
         while(utiliseRessource(transition3, 1, sock) != 0) 
@@ -250,11 +261,12 @@ void* gestion_T2(void* arg)
         }
 
         // T28 vers Ti9
-        CHECK(aiguillage(sock, 2, 13), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 2, 28), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 2, 13), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 2, 28), "Main : Troncon fail");
 
         // Libère R6
         genereRessource(Res_R6_TR,sock);
+        sleep(1);
         int* transition4 = malloc(sizeof(int));
         *transition4 = Rach_R6_TR;
         while(utiliseRessource(transition4, 1, sock) != 0) 
@@ -264,12 +276,12 @@ void* gestion_T2(void* arg)
         }
 
         // Ti09 vers T24
-        CHECK(aiguillage(sock, 2, 12), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 2, 9), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 2, 12), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 2, 9), "Main : Troncon fail");
 
         // T24 vers Ti04
-        CHECK(aiguillage(sock, 2, 20), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 2, 24), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 2, 20), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 2, 24), "Main : Troncon fail");
     }
 }
 
@@ -279,19 +291,21 @@ void* gestion_T3(void* arg)
     while(1)
     {
         //  Ti00 vers T13
-        CHECK(aiguillage(sock, 3, 0), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 3, 0), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 3, 0), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 3, 0), "Main : Troncon fail");
 
-        // T13 vers T20
-        CHECK(troncon(sock, 3, 13), "Main : Troncon fail");
+        // // T13 vers T20
+        // CHECK(troncon(sock, 3, 13), "Main : Troncon fail");
 
         // T20 vers T30
         // Peut etre aiguillage PA2
-        CHECK(troncon(sock, 3, 20), "Main : Troncon fail");
+        // CHECK(troncon(sock, 3, 20), "Main : Troncon fail");
 
         // Demande R3 et R4
         genereRessource(Req_R3_TB,sock);
+        sleep(1);
         genereRessource(Req_R4_TB,sock);
+        sleep(1);
         int* transition1 = malloc(2*sizeof(int));
         transition1[0] = Ach_R3_TB;
         transition1[1] = Ach_R4_TB;
@@ -302,11 +316,12 @@ void* gestion_T3(void* arg)
         }
 
         // T30 vers Ti9
-        CHECK(aiguillage(sock, 3, 14), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 3, 30), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 3, 14), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 3, 30), "Main : Troncon fail");
 
         // Libère R4
         genereRessource(Res_R4_TB,sock);
+        sleep(1);
         int* transition2 = malloc(sizeof(int));
         *transition2 = Rach_R4_TB;
         while(utiliseRessource(transition2, 1, sock) != 0) 
@@ -317,6 +332,7 @@ void* gestion_T3(void* arg)
 
         // Demande R2
         genereRessource(Req_R2_TB,sock);
+        sleep(1);
         int* transition3 = malloc(sizeof(int));
         *transition3 = Ach_R2_TB;
         while(utiliseRessource(transition3, 1, sock) != 0) 
@@ -326,12 +342,14 @@ void* gestion_T3(void* arg)
         }
 
         // Ti09 vers T31
-        CHECK(aiguillage(sock, 3, 13), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 3, 9), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 3, 13), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 3, 9), "Main : Troncon fail");
 
         // Libère R2 et R3
         genereRessource(Res_R2_TB,sock);
+        sleep(1);
         genereRessource(Res_R3_TB,sock);
+        sleep(1);
         int* transition4 = malloc(2*sizeof(int));
         transition4[0] = Rach_R2_TB;
         transition4[1] = Rach_R3_TB;
@@ -342,19 +360,19 @@ void* gestion_T3(void* arg)
         }
 
         // T31 vers T26
-        CHECK(troncon(sock, 3, 31), "Main : Troncon fail");
+        // CHECK(troncon(sock, 3, 31), "Main : Troncon fail");
 
         // T26 vers T15
-        CHECK(aiguillage(sock, 3, 21), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 3, 26), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 3, 21), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 3, 26), "Main : Troncon fail");
 
         // T15 vers T12
-        CHECK(aiguillage(sock, 3, 1), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 3, 15), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 3, 1), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 3, 15), "Main : Troncon fail");
 
 
         // T12 vers Ti00
-        CHECK(troncon(sock, 3, 12), "Main : Troncon fail");
+        // CHECK(troncon(sock, 3, 12), "Main : Troncon fail");
     }
 }
 
@@ -368,7 +386,9 @@ void* gestion_T4(void* arg)
 
         // Demande R1 et R5
         genereRessource(Req_R1_TJ_1,sock);
+        sleep(1);
         genereRessource(Req_R5_TJ,sock);
+        sleep(1);
         int* transition1 = malloc(2*sizeof(int));
         transition1[0] = Ach_R1_TJ_1;
         transition1[1] = Ach_R5_TJ;
@@ -379,11 +399,12 @@ void* gestion_T4(void* arg)
         }
 
         //  Ti07 vers T29
-        CHECK(aiguillage(sock, 4, 10), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 4, 7), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 4, 10), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 4, 7), "Main : Troncon fail");
 
         // Libère R1
         genereRessource(Res_R1_TJ_1,sock);
+        sleep(1);
         int* transition2 = malloc(sizeof(int));
         *transition2 = Rach_R1_TJ_1;
         while(utiliseRessource(transition2, 1, sock) != 0) 
@@ -394,8 +415,11 @@ void* gestion_T4(void* arg)
 
         // Demande R2,R3 et R6
         genereRessource(Req_R2_TJ,sock);
+        sleep(1);
         genereRessource(Req_R3_TJ,sock);
+        sleep(1);
         genereRessource(Req_R6_TJ,sock);
+        sleep(1);
         int* transition3 = malloc(3*sizeof(int));
         transition3[0] = Ach_R2_TJ;
         transition3[1] = Ach_R3_TJ;
@@ -407,12 +431,14 @@ void* gestion_T4(void* arg)
         }
 
         // T29 vers Ti09
-        CHECK(aiguillage(sock, 4, 33), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 4, 29), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 4, 33), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 4, 29), "Main : Troncon fail");
 
         // Libère R2 et R5
         genereRessource(Res_R2_TJ,sock);
+        sleep(1);
         genereRessource(Res_R5_TJ,sock);
+        sleep(1);
         int* transition4 = malloc(2*sizeof(int));
         transition4[0] = Rach_R2_TJ;
         transition4[1] = Rach_R5_TJ;
@@ -423,12 +449,13 @@ void* gestion_T4(void* arg)
         }
 
         // Ti09 vers T28
-        CHECK(aiguillage(sock, 4, 13), "Main : Changement aiguillage fail");
-        troncon(sock, 4, 49);
-        CHECK(troncon(sock, 4, 9), "Main : Troncon 9 fail");
+        // CHECK(aiguillage(sock, 4, 13), "Main : Changement aiguillage fail");
+        // troncon(sock, 4, 49);
+        // CHECK(troncon(sock, 4, 9), "Main : Troncon 9 fail");
 
         // Libère R3
         genereRessource(Res_R3_TJ,sock);
+        sleep(1);
         int* transition5 = malloc(sizeof(int));
         *transition5 = Rach_R3_TJ;
         while(utiliseRessource(transition5, 1, sock) != 0) 
@@ -439,6 +466,7 @@ void* gestion_T4(void* arg)
 
         // Demande R1
         genereRessource(Req_R1_TJ_2,sock);
+        sleep(1);
         int* transition6 = malloc(sizeof(int));
         *transition6 = Ach_R1_TJ_2;
         while(utiliseRessource(transition6, 1, sock) != 0) 
@@ -448,10 +476,11 @@ void* gestion_T4(void* arg)
         }
 
         // T28 vers T27
-        CHECK(troncon(sock, 4, 28), "Main : Troncon fail");
+        // CHECK(troncon(sock, 4, 28), "Main : Troncon fail");
 
         // Libère R6
         genereRessource(Res_R6_TJ,sock);
+        sleep(1);
         int* transition7 = malloc(sizeof(int));
         *transition7 = Rach_R6_TJ;
         while(utiliseRessource(transition7, 1, sock) != 0) 
@@ -461,11 +490,12 @@ void* gestion_T4(void* arg)
         }
 
         // T27 vers Ti07
-        CHECK(aiguillage(sock, 4, 23), "Main : Changement aiguillage fail");
-        CHECK(troncon(sock, 4, 27), "Main : Troncon fail");
+        // CHECK(aiguillage(sock, 4, 23), "Main : Changement aiguillage fail");
+        // CHECK(troncon(sock, 4, 27), "Main : Troncon fail");
 
         // Libère R1
         genereRessource(Res_R1_TJ_2,sock);
+        sleep(1);
         int* transition8 = malloc(sizeof(int));
         *transition8 = Rach_R1_TJ_2;
         while(utiliseRessource(transition8, 1, sock) != 0) 
@@ -475,7 +505,7 @@ void* gestion_T4(void* arg)
         }
 
         // Ti07 vers fin + inversion
-        CHECK(troncon(sock, 4, 37), "Main : Troncon fail");
-        troncon(sock, 4, 47);
+        // CHECK(troncon(sock, 4, 37), "Main : Troncon fail");
+        // troncon(sock, 4, 47);
     }
 }

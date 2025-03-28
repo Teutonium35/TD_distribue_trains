@@ -10,7 +10,6 @@
 #include <gestionnaireTrains.h>
 #include <gestionMutex.h>
 
-
 pthread_t thread_T1;
 pthread_t thread_T2;
 
@@ -18,16 +17,18 @@ int main() {
 
     sleep(1);
 
-    int sock;
+    int sock1;
+    int sock2;
 
     // Création du socket pour cette requête
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock1 = socket(AF_INET, SOCK_STREAM, 0);
+    sock2 = socket(AF_INET, SOCK_STREAM, 0);
 
-    pthread_create(&thread_T1, NULL, gestion_T1, &sock);
-    pthread_create(&thread_T2, NULL, gestion_T2, &sock);
+    pthread_create(&thread_T1, NULL, gestion_T1, &sock1);
+    //pthread_create(&thread_T2, NULL, gestion_T2, &sock2);
 
     pthread_join(thread_T1, NULL);
-    pthread_join(thread_T2, NULL);
+    //pthread_join(thread_T2, NULL);
     
     return 0;
 }

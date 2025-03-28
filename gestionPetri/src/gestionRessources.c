@@ -299,8 +299,17 @@ void* gestion_R4(void* arg) {
             printf("Ressource 4 est dans l'état R4_free \n");
         }
 
+        // test
+        if(prendRessource(r4_tv_alloc,2) != 0)
+        {
+            printf("La ressource 4 n'a pas pu prendre Req_R4_TV et R4_free \n");
+            sleep(3);
+        }
+        // fin test
         else if(prendRessource(r4_tv_alloc,2) == 0)
         {
+            printf("La ressource 4 a bien pu prendre Req_R4_TV et R4_free \n");
+            sleep(3);
             lacheRessource(Ach_R4_TV); // sur le réseau de Petri c'est Rach_R1_TV, je pense que c'est une erreur
             lacheRessource(R4_TV_Wait);
             printf("Ressource 4 est dans l'état R4_TV_Wait \n");
