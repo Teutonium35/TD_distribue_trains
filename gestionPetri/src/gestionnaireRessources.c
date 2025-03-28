@@ -8,6 +8,7 @@
 #include <gestionRessources.h>
 #include <gestionMutex.h>
 #include <gestionCommunication.h>
+#include <errno.h>
 
 #define LOCALIP "127.0.0.1"
 #define LOCALPORT 3000
@@ -52,7 +53,23 @@ void * listen_msg(void * arg){
             pthread_create(&thread, NULL, handle_client, request);
             pthread_detach(thread);
         }
+        else if (nbcar == 0){
+            printf("Client %d déconnecté\n", sd);
+            close(sd);
+            break;
+        }
+        else
+        {
+            // If the error is due to an interruption, continue waiting
+            if (errno == EINTR) continue;
+            else {
+                perror("threadConnexionClient: recv - Reception error");
+                break;
+            }
+        }
     }
+    pthread_exit(NULL);
+    return NULL;
 }
 
 int main() {

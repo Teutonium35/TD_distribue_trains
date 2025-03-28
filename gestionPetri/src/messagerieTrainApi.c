@@ -439,7 +439,7 @@ void train4(int sd1){
 
     // Ti09 vers T28
     CHECK(aiguillage(sd1, 4, 13), "Main : Changement aiguillage fail");
-    troncon(sd1, 4, 49);
+    troncon(sd1, 4, 49);// inversion de troncon, renvoie un acknowledge different des troncons normaux
     CHECK(troncon(sd1, 4, 9), "Main : Troncon 9 fail");
 
     // T28 vers T27
@@ -451,5 +451,5 @@ void train4(int sd1){
 
     // Ti07 vers fin + inversion
     CHECK(troncon(sd1, 4, 37), "Main : Troncon fail");
-    troncon(sd1, 4, 47);
+    troncon(sd1, 4, 47);// inversion de troncon, renvoie un acknowledge different des troncons normaux
 }

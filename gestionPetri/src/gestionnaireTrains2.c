@@ -18,39 +18,16 @@
 #define CHECKERROR(var,val,msg)     if (var==val) {perror(msg); exit(1);}
 
 
-pthread_t thread_T3;
-pthread_t thread_T4;
 
-int init_socket(struct sockaddr_in * addrServ, int * sd1){
-    //Etape 1 - Creation de la socket
-
-    *sd1=socket(AF_INET, SOCK_STREAM, 0);
-
-    CHECKERROR(*sd1,-1, "Creation fail !!!\n");
-
-    //Etape2 - Adressage du destinataire
-
-    (*addrServ).sin_family=AF_INET;
-    (*addrServ).sin_port=htons(REMOTEPORT);
-    (*addrServ).sin_addr.s_addr=inet_addr(REMOTEIP);
-
-    //Etape 3 - demande d'ouverture de connexion
-
-    CHECKERROR(connect(*sd1, (const struct sockaddr *) addrServ, sizeof(struct sockaddr_in)),-1, "Connexion fail !!!\n");
-
-    return 1;
-}
 
 int main() {
-    int sd3; //descripteur de socket de dialogue
-    int sd4;
-    struct sockaddr_in addrServ;
+    pthread_t thread_T3;
+    pthread_t thread_T4;
 
-    init_socket(&addrServ, &sd3);
-    init_socket(&addrServ, &sd4);
+    printf("Debut gestionnaire train 2\n");
 
-    pthread_create(&thread_T3, NULL, gestion_T3, &sd3);
-    pthread_create(&thread_T4, NULL, gestion_T4, &sd4);
+    pthread_create(&thread_T3, NULL, gestion_T3, NULL);
+    pthread_create(&thread_T4, NULL, gestion_T4, NULL);
 
     pthread_join(thread_T3, NULL);
     pthread_join(thread_T4, NULL);
