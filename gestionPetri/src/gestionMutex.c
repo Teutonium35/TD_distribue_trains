@@ -9,9 +9,9 @@
 
 pthread_mutex_t resources[NOMBRE_RESSOURCES];  // Ensemble des ressources, tout train confondu
 
-int prendRessource(int*r, int nombreRessourcesDemandées)
+int prendRessource(int*r, int nombreRessourcesDemandees)
 {
-    for(int i=0; i<nombreRessourcesDemandées; i++)
+    for(int i=0; i<nombreRessourcesDemandees; i++)
     {
         if(pthread_mutex_trylock(&resources[r[i]]) != 0)
         {

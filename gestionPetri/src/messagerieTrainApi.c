@@ -105,7 +105,7 @@ int changementAiguillage(int sd, int nTrain, int codeAig){
     char *requete, buff[100], *recu; 
     int nbcar, tailleRequete; 
     
-    int ipXwaySrc = getIPXwaySrc();
+    int ipXwaySrc = getIPXwaySrc(nTrain);
 
     requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 1, idRequete, "37", ecritureMots(nTrain, ipXwaySrc, -1, codeAig)); 
     DEBUG_PRINT("changementAiguillage : requete=%s\n", requete);
@@ -140,7 +140,7 @@ int allumageTroncon(int sd, int nTrain, int codeTroncon){
     char *requete, buff[100], *recu; 
     int nbcar, tailleRequete; 
 
-    int ipXwaySrc = getIPXwaySrc();
+    int ipXwaySrc = getIPXwaySrc(nTrain);
 
     requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 1, idRequete, "37", ecritureMots(nTrain, ipXwaySrc, codeTroncon, -1)); 
     DEBUG_PRINT("allumageTroncon : Requete=%s\n", requete);
@@ -179,14 +179,18 @@ int reponseXway(int sd, int *nTrain, int *nType, int *nCapteur){
     recu = conversionBinaire2Ascii(buff, nbcar);
     DEBUG_PRINT("reponseXway : Reponse=%s\n", recu);
 
-    
+    // Get  idRequete
     int idRequete = (recu[26] <= '9' ? recu[26] - '0' : recu[26] - 'A' + 10) * 16 + (recu[27] <= '9' ? recu[27] - '0' : recu[27] - 'A' + 10);
     DEBUG_PRINT("reponseXway : idRequete=%d\n", idRequete);
     
+    // Get ipXwaySrc
+    int ipXwaySrc = (recu[20] <= '9' ? recu[20] - '0' : recu[20] - 'A' + 10) * 16 + (recu[21] <= '9' ? recu[21] - '0' : recu[21] - 'A' + 10);
+    DEBUG_PRINT("reponseXway : ipXwaySrc=%d\n", ipXwaySrc);
+
     int tailleRequete;
     char *requete; 
-    int ipXwaySrc = getIPXwaySrc();
-
+    
+    // Creation requete
     requete = creationRequete(ipXwaySrc, IPXWAY_DEST, 0, idRequete, "fe",   NULL); 
     DEBUG_PRINT("reponseXway : Requete=%s\n", requete);
 
@@ -293,16 +297,39 @@ int reponseXway(int sd, int *nTrain, int *nType, int *nCapteur){
 }
 
     
-int getIPXwaySrc(){
-    FILE *fichier;
+int getIPXwaySrc(int nTrain){
     int ipXwaySrc;
-    CHECK_NULL(fichier = fopen("IP_XWAY_SRC", "r"), "fopen(XP_XWAY_SRC)");
+
+
+    // Version fichier
+
+    // FILE *fichier;
+    // CHECK_NULL(fichier = fopen("IP_XWAY_SRC", "r"), "fopen(XP_XWAY_SRC)");
+    // fscanf(fichier, "%d", &ipXwaySrc);
+    // fclose(fichier);
+
+    // Version changement ip en fx du train
     
-    fscanf(fichier, "%d", &ipXwaySrc);
+    switch (nTrain)
+    {
+    case 1:
+        ipXwaySrc = 41;
+        break;
+    case 2: 
+        ipXwaySrc = 42;
+        break;
+    case 3:
+        ipXwaySrc = 43;
+        break;
+    case 4:
+        ipXwaySrc = 44;
+        break;
+    default:
+        break;
+    }
 
     DEBUG_PRINT("getIPXwaySrc : ipXwaySrc=%d\n", ipXwaySrc);
 
-    fclose(fichier);
     return ipXwaySrc;
 }
 
@@ -439,7 +466,7 @@ void train4(int sd1){
 
     // Ti09 vers T28
     CHECK(aiguillage(sd1, 4, 13), "Main : Changement aiguillage fail");
-    troncon(sd1, 4, 49);
+    troncon(sd1, 4, 49);// inversion de troncon, renvoie un acknowledge different des troncons normaux
     CHECK(troncon(sd1, 4, 9), "Main : Troncon 9 fail");
 
     // T28 vers T27
@@ -451,5 +478,58 @@ void train4(int sd1){
 
     // Ti07 vers fin + inversion
     CHECK(troncon(sd1, 4, 37), "Main : Troncon fail");
-    troncon(sd1, 4, 47);
+    troncon(sd1, 4, 47);// inversion de troncon, renvoie un acknowledge different des troncons normaux
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ifdef TEST
+int main(int argc, char const *argv[]) 
+{   
+    
+    int sd1; //descripteur de socket de dialogue
+    struct sockaddr_in addrServ;
+    
+    
+
+    //Etape 1 - Creation de la socket
+
+    sd1 = socket(AF_INET, SOCK_STREAM, 0);
+
+    CHECK(sd1, "Creation fail n");
+
+    //Etape2 - Adressage du destinataire
+
+    addrServ.sin_family=AF_INET;
+    addrServ.sin_port=htons(PORT_DEST); 
+    addrServ.sin_addr.s_addr=inet_addr(IP_DEST); 
+
+
+    //Etape 3 - demande d'ouverture de connexion
+    printf("IP_DEST : %s, PORT_DEST: %d\n", IP_DEST, PORT_DEST);
+    CHECK(connect(sd1, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)), "connect(adddServ) fail\n");
+    printf("Connexion reussie\n");
+
+   
+
+    train4(sd1);
+
+
+    
+    close(sd1);
+    return 0;
+}
+#endif

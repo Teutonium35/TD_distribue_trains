@@ -19,22 +19,21 @@ void* handle_client(void* arg) {
     if(resource_code > 0)
     {
         int nombreRessources = resource_code % 500;
-        int *ressources_demandées = malloc(sizeof(int)* nombreRessources);
+        int *ressources_demandees = malloc(sizeof(int)* nombreRessources);
         // on décode le message transmis pour en déduire les ressources demandées
         for(int i=0; i<nombreRessources; i++)
         {
-            ressources_demandées[i] = (resource_code / (int)pow(500,i+1)) % 500 - 1;
+            ressources_demandees[i] = (resource_code / (int)pow(500,i+1)) % 500 - 1;
         }
         printf("Le client demande une ou des ressources par le code %d \n", resource_code);
 
         // on n'a pas pu prendre toutes les ressources 
-        if(prendRessource(ressources_demandées, nombreRessources) == 1)
+        if(prendRessource(ressources_demandees, nombreRessources) == 1)
         {
             snprintf(buffer, sizeof(buffer), "%d \n", 1); // envoi de '1' pour signifier que toutes les ressources demandées ne sont pas dispos
             send(client_socket, buffer, strlen(buffer), 0);
 
             // Fermer la connexion et libérer la mémoire
-            close(client_socket);
             free(request);
             pthread_exit(NULL);
         }
@@ -57,7 +56,6 @@ void* handle_client(void* arg) {
     send(client_socket, buffer, strlen(buffer), 0);
 
     // Fermer la connexion et libérer la mémoire
-    close(client_socket);
     free(request);
     printf("\n");
     pthread_exit(NULL);

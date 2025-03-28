@@ -8,6 +8,7 @@
 #include <gestionRessources.h>
 #include <gestionMutex.h>
 #include <gestionCommunication.h>
+#include <errno.h>
 
 #define LOCALIP "127.0.0.1"
 #define LOCALPORT 3000
@@ -37,6 +38,8 @@ void * listen_msg(void * arg){
     while (1){
         // Lire la requête du client (indice de la ressource demandée)
         nbcar=recv(sd,buff, MAXCAR, 0);
+        buff[nbcar] = '\0';
+        printf("listenMsg de %d = %d\n", sd, nbcar);
         if (nbcar>0){
             printf("SERVEUR : '%s', %d \n", buff, nbcar);
             int resource_id = atoi(buff);  // Convertir en entier
@@ -50,7 +53,23 @@ void * listen_msg(void * arg){
             pthread_create(&thread, NULL, handle_client, request);
             pthread_detach(thread);
         }
+        else if (nbcar == 0){
+            printf("Client %d déconnecté\n", sd);
+            close(sd);
+            break;
+        }
+        else
+        {
+            // If the error is due to an interruption, continue waiting
+            if (errno == EINTR) continue;
+            else {
+                perror("threadConnexionClient: recv - Reception error");
+                break;
+            }
+        }
     }
+    pthread_exit(NULL);
+    return NULL;
 }
 
 int main() {
@@ -99,8 +118,8 @@ int main() {
     for(int i=0; i<NOMBRE_RESSOURCES; i++)
     {
         // pthread_mutex_lock(&resources[i]); // il y a un problème : le réseau de Petri ne devrait pas évoluer avec des ressources bloquées
-        if(i != R1_free && i != Req_R1_TR && i!= R2_free && i != Req_R2_TV && i!= R3_free && i != Req_R3_TB
-        && i!= R4_free && i != Req_R4_TV && i != R5_free && i != Req_R5_TJ && i != R6_free && i != Req_R6_TJ)
+        if(i != R1_free && i != R2_free && i != R3_free 
+        && i != R4_free && i != R5_free && i != R6_free )
         {
             pthread_mutex_lock(&resources[i]);
         }
