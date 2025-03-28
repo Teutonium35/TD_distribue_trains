@@ -45,7 +45,7 @@ void* handle_client(void* arg) {
     }
     else
     {
-        resource_code = -resource_code -1;
+        resource_code = -resource_code;
         printf("Client libère la ressource %d\n", resource_code+1);
         // Libérer le mutex de la ressource demandée
         lacheRessource(resource_code);
