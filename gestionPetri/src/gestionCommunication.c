@@ -34,7 +34,6 @@ void* handle_client(void* arg) {
             send(client_socket, buffer, strlen(buffer), 0);
 
             // Fermer la connexion et libérer la mémoire
-            close(client_socket);
             free(request);
             pthread_exit(NULL);
         }
@@ -57,7 +56,6 @@ void* handle_client(void* arg) {
     send(client_socket, buffer, strlen(buffer), 0);
 
     // Fermer la connexion et libérer la mémoire
-    close(client_socket);
     free(request);
     printf("\n");
     pthread_exit(NULL);

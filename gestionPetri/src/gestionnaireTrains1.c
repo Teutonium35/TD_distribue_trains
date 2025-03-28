@@ -40,20 +40,20 @@ int init_socket(struct sockaddr_in * addrServ, int * sd1){
 }
 
 int main() {
-    int sd1; //descripteur de socket de dialogue
-    int sd2;
-    struct sockaddr_in addrServ;
+    // int sd1; //descripteur de socket de dialogue
+    // int sd2;
+    // struct sockaddr_in addrServ;
 
-    init_socket(&addrServ, &sd1);
-    init_socket(&addrServ, &sd2);
+    // init_socket(&addrServ, &sd1);
+    // init_socket(&addrServ, &sd2);
 
     printf("sockets init\n");
 
-    pthread_create(&thread_T1, NULL, gestion_T1, &sd1);
-    pthread_create(&thread_T2, NULL, gestion_T2, &sd2);
+    pthread_create(&thread_T1, NULL, gestion_T1, NULL);
+    // pthread_create(&thread_T2, NULL, gestion_T2, &sd2);
 
     pthread_join(thread_T1, NULL);
-    pthread_join(thread_T2, NULL);
+    // pthread_join(thread_T2, NULL);
     
     return 0;
 }
