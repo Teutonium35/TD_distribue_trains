@@ -59,7 +59,7 @@ int genereRessource(int r, int sock) {
 }
 
 // Fonction pour libérer une ressource en créant une nouvelle connexion
-int utiliseRessource(int* r, int nombreRessourcesDemandées, int sock) {
+int utiliseRessource(int* r, int nombreRessourcesDemandees, int sock) {
     // int sock;
     struct sockaddr_in serv_addr;
     char message[1000000];
@@ -88,8 +88,8 @@ int utiliseRessource(int* r, int nombreRessourcesDemandées, int sock) {
         return -1;
     }
 
-    int envoi = nombreRessourcesDemandées;
-    for(int i=0; i<nombreRessourcesDemandées; i++)
+    int envoi = nombreRessourcesDemandees;
+    for(int i=0; i<nombreRessourcesDemandees; i++)
     {
         envoi += r[i] * pow(500,i+1); // on génère le nombre qui demande les ressources de r
     }
