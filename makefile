@@ -29,10 +29,10 @@ testMsg: bin/messagerieTrainApiTEST
 		@./bin/messagerieTrainApiTEST
 
 bin/receptionTestApiXway: src/receptionTestApiXway.c
-	@gcc $(CSTFLAGS) -DTEST $(CFLAGS) $^ -o $@ $(LIBS)
+	gcc $(CSTFLAGS) -DTEST $(CFLAGS) $^ -o $@ $(LIBS)
 
 testRecp: bin/receptionTestApiXway
-	@./bin/receptionTestApiXway
+	./bin/receptionTestApiXway
 
 clean:
 	@rm -f ./bin/*
